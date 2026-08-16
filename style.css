@@ -1,36 +1,85 @@
-.upload-box {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+body {
+    background-color: #ffffff;
+  }
+  .inputfield {
+      width: 520px;
+      height: 55px;
+      font-size:17px;
+      margin-top: 570px;
+      font-family: sans-serif;
   
-    width: 400px;
-    height: 110px;
-    padding: 24px;
-    box-sizing: content-box;
+      border: 2px solid #ccc; 
+      border-radius: 32px;          /* rounded corners */
   
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 19px;
   
-    color: #333;
-    background: #fff;
+  }
+  
+  .inputfield:focus {
+  
+      border-color: #0031f3;       /*glow*/  
+      background-color: #ffffff;  
+      box-shadow: 0 0 300px rgba(102, 136, 215, 0.2);
+   
+      outline: none;                
+    }
+    #scene-container {
+      position: relative;
+      width: 100%;
+      
+      z-index: 0;
+    }
+    
+    #scene-container canvas {
+      display: block;
+    }
+    .upload-box {
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    
+      width: 400px;
+      height: 110px;
+      padding: 24px;
+      box-sizing: content-box;
+    
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 19px;
+    
+      color: #333;
+      background: #fff;
+      border-radius: 32px;
+      cursor: pointer;
+      text-align: center;
+    }
+    
+    .dashed-border {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    
+    .upload-box:hover .dashed-border rect {
+      stroke: #8989c2;
+    }
+    
+  .enterbutton {
+    width:60px;
+    height:40px;
     border-radius: 32px;
-    cursor: pointer;
-    text-align: center;
-  }
-
-  #scene-container {
-    position: fixed;
-    inset: 0;          /* top/right/bottom/left: 0 */
-    z-index: 0;
-  }
+    border:none;
+    left: 60%;
+    transform: translate(2100%, -140%);
   
-  #scene-container canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
+    background-color: #009dff;
   
+  }
+  .enterbutton:hover {
+    background-color: #3547e6;
+    
+  }
