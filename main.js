@@ -65,7 +65,10 @@ input.addEventListener("change", (event) => {
 
     mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
-
+    
+    document.getElementsByClassName("upload-box")[0].style.display ="none";
+    document.getElementById("Droptext").style.display ="none";
+    
     geometry.computeBoundingBox();
 
     const center = geometry.boundingBox.getCenter(new THREE.Vector3());
