@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>AI CAD Evaluator</title>
+        <link rel="stylesheet" href="style.css"> 
+
+    </head>
+
+    <body>
+        <script type="importmap">
+            
+            {
+                "imports": {
+                  "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
+                  "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
+                }
+              }
+        </script>
+
+        <div id="scene-container"></div>
+
+        <center><h1>Drop in an STL file to get started!</h1></center>
+       
+        <label for="file-input" class="upload-box">
+            <svg class="dashed-border" viewBox="0 0 460 170" preserveAspectRatio="none">
+                <rect
+                  x="4"
+                  y="4"
+                  width="452"
+                  height="162"
+                  rx="32"
+                  fill="none"
+                  stroke="#c9cacd"
+                  stroke-width="6"
+                  stroke-dasharray="12 12"
+                  stroke-linecap="round"
+                />
+              </svg>
+            <strong>Upload an STL model</strong>
+           
+            <span>Click to browse, or drag and drop a file here</span>
+            <input id="file-input" type="file" accept=".STL" hidden>
+
+        </label>
+
+        <center><input type = "text" class="inputfield" placeholder="What should I look for?"></center>
+        
+        <button class="enterbutton">Go!</button>
+        
+        <script src="main.js" type="module" defer></script>
+
+</script>
+</body>
+</html>
