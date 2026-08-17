@@ -12,11 +12,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json({ limit: "10mb" }));
-
-// 1. Serve static frontend files
 app.use(express.static(__dirname));
-
-// 2. SERVE NODE_MODULES FOR LOCAL THREE.JS IMPORTS (Fixes CORS!)
 app.use("/node_modules", express.static(path.join(__dirname, "node_modules")));
 
 app.get("/", (req, res) => {
@@ -25,47 +21,60 @@ app.get("/", (req, res) => {
 
 app.post("/api/model-overview", async (req, res) => {
   try {
-    const { screenshot, modelInfo } = req.body;
+    const { modelInfo } = req.body;
     const apiKey = process.env.GROQ_API_KEY;
 
     if (!apiKey) {
-      return res.status(500).json({ error: "GROQ_API_KEY is not set in environment variables." });
+      return res.status(500).json({
+        error: "GROQ_API_KEY is missing. Please set it in your .env file."
+      });
     }
 
-    const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    if (!modelInfo || !modelInfo.dimensions) {
+      return res.status(400).json({
+        error: "Invalid or missing modelInfo payload."
+      });
+    }
+
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama-3.2-11b-vision-preview",
+        model: "openai/gpt-oss-20b",
         messages: [
           {
             role: "user",
-            content: [
-              {
-                type: "text",
-                text: `Analyze this 3D STL model. Dimensions: ${modelInfo.dimensions.width}x${modelInfo.dimensions.height}x${modelInfo.dimensions.depth}. Vertices: ${modelInfo.vertices}, Triangles: ${modelInfo.triangles}.`
-              },
-              {
-                type: "image_url",
-                image_url: { url: screenshot }
-              }
-            ]
+            content: `Analyze this 3D STL model based on its geometric metadata:
+- Dimensions (X x Y x Z): ${modelInfo.dimensions.width}mm x ${modelInfo.dimensions.height}mm x ${modelInfo.dimensions.depth}mm
+- Vertices: ${modelInfo.vertices}
+- Triangles: ${modelInfo.triangles}
+
+Provide a concise technical breakdown:
+1. Bounding Box & Envelope Assessment
+2. Structural/Mesh Resolution Density
+3. 3D Printing Recommendations (orientation, potential overhangs, print bed sizing)`
           }
         ],
         temperature: 0.2
       })
     });
 
-    const data = await groqResponse.json();
-    if (!groqResponse.ok) {
-      return res.status(groqResponse.status).json({ error: data.error?.message || "Groq error" });
+    const data = await response.json();
+
+    if (!response.ok) {
+      return res.status(response.status).json({
+        error: data.error?.message || "Groq API request failed."
+      });
     }
 
-    res.json({ overview: data.choices?.[0]?.message?.content || "No analysis available." });
+    const overview = data.choices?.[0]?.message?.content || "No overview generated.";
+    res.json({ overview });
+
   } catch (error) {
+    console.error("Server Error:", error);
     res.status(500).json({ error: error.message });
   }
 });

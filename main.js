@@ -101,7 +101,7 @@ if (input) {
 
     if (fileName) fileName.textContent = file.name;
     if (aiStatus) aiStatus.textContent = "Loading STL model...";
-    if (aiOverview) aiOverview.textContent = "";
+    if (aiOverview) aiOverview.innerText = "";
     if (analyzeButton) analyzeButton.disabled = true;
 
     const reader = new FileReader();
@@ -156,7 +156,7 @@ if (analyzeButton) {
 
     analyzeButton.disabled = true;
     if (aiStatus) aiStatus.textContent = "Groq is analyzing the model...";
-    if (aiOverview) aiOverview.textContent = "";
+    if (aiOverview) aiOverview.innerText = "";
 
     renderer.render(scene, camera);
     const screenshot = renderer.domElement.toDataURL("image/jpeg", 0.85);
@@ -179,7 +179,8 @@ if (analyzeButton) {
         throw new Error(data.error || "AI analysis failed.");
       }
 
-      if (aiOverview) aiOverview.textContent = data.overview;
+      // Use innerText to respect line breaks and newlines in the response
+      if (aiOverview) aiOverview.innerText = data.overview;
       if (aiStatus) aiStatus.textContent = "Analysis complete.";
     } catch (error) {
       console.error(error);
