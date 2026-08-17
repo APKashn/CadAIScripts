@@ -40,14 +40,15 @@ app.post("/api/model-overview", async (req, res) => {
     const prompt = `You are a senior mechanical design engineer doing a quick CAD review for a teammate.
 
 Mesh Data:
-- Dimensions (X x Y x Z): ${width}mm x ${height}mm x${depth}mm
+- Dimensions (X x Y x Z): ${width}mm x ${height}mm x${depth}mm  also give the dimensions in INCHES as a secondary measurement.
 - Max Aspect Ratio: ${ratio}:1
 - Geometry Detail: ${modelInfo.triangles.toLocaleString()} triangles (${modelInfo.vertices.toLocaleString()} vertices)
 
 Review this part casually, naturally, be informitive, and constructively like an engineer speaking to someone who needs some help.
 1. Speak in first-person ("Looking at this...", "My first thought...", "I'd watch out for...").
 2. Don't use dry manual-style headers or robotic lists. Use short, conversational paragraphs or quick bullet points.
-3. Call out practical considerations (scale relative to a standard print bed, layer orientation for strength, wall loops/infill).
+3. Call out practical considerations (scale relative to a standard print bed, layer orientation for strength, wall loops/infill), and 
+specify print settings like infil. Tell the user exactly what infill and the exact percent and give a list of other print settings depending on the usecase. More strength needed more a robotic part ect..
 4. Keep total output under 180 words.
 5. Compliment the user on what's done well in the model.
 6. Tell the user what their next steps should be.
