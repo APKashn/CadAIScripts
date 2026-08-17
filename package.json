@@ -1,0 +1,19 @@
+{
+    "name": "stl-ai-viewer",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+      "dev": "concurrently \"vite\" \"node server.mjs\""
+    },
+    "dependencies": {
+      "dotenv": "^16.4.7",
+      "express": "^4.21.2",
+      "groq-sdk": "^0.18.0",
+      "three": "^0.174.0"
+    },
+    "devDependencies": {
+      "concurrently": "^9.1.2",
+      "vite": "^6.2.0"
+    }
+  }
