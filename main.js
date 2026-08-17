@@ -6,6 +6,9 @@ const input = document.getElementById("file-input");
 const fileName = document.getElementById("file-name");
 const container = document.getElementById("scene-container");
 
+const width = container.clientWidth;
+const height = container.clientHeight;
+
 input.addEventListener("change", () => {
   if (input.files.length) {
     fileName.textContent = input.files[0].name;
@@ -18,7 +21,7 @@ scene.background = new THREE.Color(0xfffff);
 
 const camera = new THREE.PerspectiveCamera(
   50,
-  window.innerWidth / window.innerHeight,
+  width / height,
   0.1,
   1000
 );
@@ -26,7 +29,7 @@ camera.position.set(0, 0, 100);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(window.devicePixelRatio);
-renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setSize(width, height);
 container.appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -68,7 +71,8 @@ input.addEventListener("change", (event) => {
     
     document.getElementsByClassName("upload-box")[0].style.display ="none";
     document.getElementById("Droptext").style.display ="none";
-    
+    //document.getElementsByClassName("scene-container")[0].style.height ="700px";
+
     geometry.computeBoundingBox();
 
     const center = geometry.boundingBox.getCenter(new THREE.Vector3());
@@ -93,7 +97,7 @@ function animate() {
 animate();
 
 window.addEventListener("resize", () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.aspect = width / height;
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(width, height);
 });
