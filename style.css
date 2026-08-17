@@ -83,7 +83,8 @@ body {
       stroke: #8989c2;
     }
     
-  .enterbutton {
+  
+  #enterbutton {
     width:60px;
     height:40px;
     border-radius: 32px;
@@ -94,7 +95,7 @@ body {
     background-color: #009dff;
   
   }
-  .enterbutton:hover {
+  #enterbutton:hover {
     background-color: #3547e6;
     
   }
