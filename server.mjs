@@ -25,16 +25,33 @@ app.post("/api/model-overview", async (req, res) => {
     const apiKey = process.env.GROQ_API_KEY;
 
     if (!apiKey) {
-      return res.status(500).json({
-        error: "GROQ_API_KEY is missing. Please set it in your .env file."
-      });
+      return res.status(500).json({ error: "GROQ_API_KEY is missing from .env file." });
     }
 
     if (!modelInfo || !modelInfo.dimensions) {
-      return res.status(400).json({
-        error: "Invalid or missing modelInfo payload."
-      });
+      return res.status(400).json({ error: "Invalid modelInfo payload." });
     }
+
+    const { width, height, depth } = modelInfo.dimensions;
+    const maxDim = Math.max(width, height, depth);
+    const minDim = Math.min(width, height, depth);
+    const ratio = (maxDim / (minDim || 1)).toFixed(1);
+
+    const prompt = `You are a senior mechanical design engineer doing a quick CAD review for a teammate.
+
+Mesh Data:
+- Dimensions (X x Y x Z): ${width}mm x ${height}mm x${depth}mm
+- Max Aspect Ratio: ${ratio}:1
+- Geometry Detail: ${modelInfo.triangles.toLocaleString()} triangles (${modelInfo.vertices.toLocaleString()} vertices)
+
+Review this part casually, naturally, be informitive, and constructively like an engineer speaking to someone who needs some help.
+1. Speak in first-person ("Looking at this...", "My first thought...", "I'd watch out for...").
+2. Don't use dry manual-style headers or robotic lists. Use short, conversational paragraphs or quick bullet points.
+3. Call out practical considerations (scale relative to a standard print bed, layer orientation for strength, wall loops/infill).
+4. Keep total output under 180 words.
+5. Compliment the user on what's done well in the model.
+6. Tell the user what their next steps should be.
+7. Provide a friendly and polite ending to motivate the user into continuing with using the product.`;
 
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
@@ -44,21 +61,9 @@ app.post("/api/model-overview", async (req, res) => {
       },
       body: JSON.stringify({
         model: "openai/gpt-oss-20b",
-        messages: [
-          {
-            role: "user",
-            content: `Analyze this 3D STL model based on its geometric metadata:
-- Dimensions (X x Y x Z): ${modelInfo.dimensions.width}mm x ${modelInfo.dimensions.height}mm x ${modelInfo.dimensions.depth}mm
-- Vertices: ${modelInfo.vertices}
-- Triangles: ${modelInfo.triangles}
-
-Provide a concise technical breakdown:
-1. Bounding Box & Envelope Assessment
-2. Structural/Mesh Resolution Density
-3. 3D Printing Recommendations (orientation, potential overhangs, print bed sizing)`
-          }
-        ],
-        temperature: 0.2
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.65,
+        top_p: 0.95
       })
     });
 
@@ -70,7 +75,7 @@ Provide a concise technical breakdown:
       });
     }
 
-    const overview = data.choices?.[0]?.message?.content || "No overview generated.";
+    const overview = data.choices?.[0]?.message?.content || "No review generated.";
     res.json({ overview });
 
   } catch (error) {
