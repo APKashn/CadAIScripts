@@ -17,7 +17,7 @@ input.addEventListener("change", () => {
 });
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xfffff);
+scene.background = new THREE.Color(0xffffff);
 
 const camera = new THREE.PerspectiveCamera(
   50,
@@ -61,7 +61,7 @@ input.addEventListener("change", (event) => {
     geometry.computeVertexNormals();
 
     const material = new THREE.MeshStandardMaterial({
-      color: 0x4ea5ff,
+      color: 0x808080,
       metalness: 0.15,
       roughness: 0.55
     });

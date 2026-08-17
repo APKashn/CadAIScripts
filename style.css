@@ -1,5 +1,5 @@
 body {
-    background-color: #ffffff;
+    background-color: #000000;
   }
 
 [hidden] {
@@ -10,10 +10,12 @@ body {
       width: 520px;
       height: 55px;
       font-size:17px;
-      margin-top: 570px;
+      margin-top: 640px;
       font-family: sans-serif;
   
       border: 2px solid #ccc; 
+      box-shadow: 0px 0px 100px 45px rgba(23, 69, 236, 0.8);
+
       border-radius: 32px;          /* rounded corners */
   
   
@@ -23,7 +25,6 @@ body {
   
       border-color: #0031f3;       /*glow*/  
       background-color: #ffffff;  
-      box-shadow: 0 0 300px rgba(102, 136, 215, 0.2);
    
       outline: none;                
     }
@@ -48,12 +49,12 @@ body {
       
     .upload-box {
       position: fixed;
-      top: 30%;
+      top: 35%;
       left: 50%;
       transform: translate(-50%, -50%);
     
-      width: 400px;
-      height: 110px;
+      width: 570px;
+      height: 230px;
       padding: 24px;
       box-sizing: content-box;
     
