@@ -1,71 +1,78 @@
-import "dotenv/config";
 import express from "express";
-import Groq from "groq-sdk";
+import path from "path";
+import { fileURLToPath } from "url";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
+// Essential: Allow large payloads because base64 screenshots can be several megabytes
+app.use(express.json({ limit: "10mb" }));
 
-app.use(express.json({ limit: "15mb" }));
+// Serve static frontend files (HTML, main.js, CSS, etc.)
+app.use(express.static(__dirname));
 
+// Backend route handling POST requests from analyzeButton
 app.post("/api/model-overview", async (req, res) => {
-  const { screenshot, modelInfo } = req.body;
-
-  if (!screenshot || !modelInfo) {
-    return res.status(400).json({
-      error: "Screenshot or model information is missing.",
-    });
-  }
-
   try {
-    const completion = await groq.chat.completions.create({
-      model: "meta-llama/llama-4-scout-17b-16e-instruct",
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: `Give a concise overview of this uploaded STL model.
+    const { screenshot, modelInfo } = req.body;
 
-Model data:
-${JSON.stringify(modelInfo, null, 2)}
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ error: "GROQ_API_KEY is not set in environment variables." });
+    }
 
-Explain:
-- likely object purpose, if recognizable
-- visible shape and main features
-- obvious 3D-printing considerations
-- what cannot be determined from this view
-
-Do not invent details. STL files do not contain unit information.`,
-            },
-            {
-              type: "image_url",
-              image_url: {
-                url: screenshot,
+    const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "llama-3.2-11b-vision-preview",
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: `Analyze this 3D STL model. Dimensions: ${modelInfo.dimensions.width}x${modelInfo.dimensions.height}x${modelInfo.dimensions.depth}. Vertices: ${modelInfo.vertices}, Triangles: ${modelInfo.triangles}. Provide a concise structural summary and functional overview.`
               },
-            },
-          ],
-        },
-      ],
-      temperature: 0.2,
-      max_completion_tokens: 700,
+              {
+                type: "image_url",
+                image_url: {
+                  url: screenshot
+                }
+              }
+            ]
+          }
+        ],
+        temperature: 0.2
+      })
     });
 
-    res.json({
-      overview: completion.choices[0].message.content,
-    });
+    const data = await groqResponse.json();
+
+    if (!groqResponse.ok) {
+      return res.status(groqResponse.status).json({
+        error: data.error?.message || "Groq API request failed."
+      });
+    }
+
+    const overview = data.choices?.[0]?.message?.content || "No analysis generated.";
+    res.json({ overview });
+
   } catch (error) {
-    console.error("Groq error:", error);
-
-    res.status(500).json({
-      error: "AI analysis failed. Check the terminal for details.",
-    });
+    console.error("Server Error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
-app.listen(3001, () => {
-  console.log("Groq server running at http://localhost:3001");
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
 });

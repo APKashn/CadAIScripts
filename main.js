@@ -16,7 +16,7 @@ scene.background = new THREE.Color(0xffffff);
 const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
 camera.position.set(0, 0, 100);
 
-// preserveDrawingBuffer allows us to capture the canvas as an image for Groq.
+// preserveDrawingBuffer allows capturing canvas screenshots
 const renderer = new THREE.WebGLRenderer({
   antialias: true,
   preserveDrawingBuffer: true,
@@ -24,6 +24,10 @@ const renderer = new THREE.WebGLRenderer({
 
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 container.appendChild(renderer.domElement);
+
+// Ensure renderer element takes full size of parent container
+renderer.domElement.style.width = "100%";
+renderer.domElement.style.height = "100%";
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
@@ -43,14 +47,14 @@ function resizeRenderer() {
   const width = container.clientWidth;
   const height = container.clientHeight;
 
-  if (!width || !height) return;
+  if (width === 0 || height === 0) return;
 
-  renderer.setSize(width, height);
+  renderer.setSize(width, height, false);
   camera.aspect = width / height;
   camera.updateProjectionMatrix();
 }
 
-new ResizeObserver(resizeRenderer).observe(container);
+window.addEventListener("resize", resizeRenderer);
 resizeRenderer();
 
 function getModelInfo(geometry) {
@@ -81,113 +85,113 @@ function frameModel(geometry) {
   const diagonal = Math.max(size.length(), 1);
   const distance = diagonal * 1.6;
 
-  // Move the model geometry so it sits in the center of the scene.
   geometry.center();
 
-  camera.near = Math.max(diagonal / 1000, 0.01);
-  camera.far = Math.max(diagonal * 100, 1000);
   camera.position.set(distance, distance * 0.7, distance);
-  camera.updateProjectionMatrix();
+  camera.lookAt(0, 0, 0);
 
   controls.target.set(0, 0, 0);
   controls.update();
 }
 
-input.addEventListener("change", (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
+if (input) {
+  input.addEventListener("change", (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
 
-  fileName.textContent = file.name;
-  aiStatus.textContent = "Loading STL model...";
-  aiOverview.textContent = "";
-  analyzeButton.disabled = true;
+    if (fileName) fileName.textContent = file.name;
+    if (aiStatus) aiStatus.textContent = "Loading STL model...";
+    if (aiOverview) aiOverview.textContent = "";
+    if (analyzeButton) analyzeButton.disabled = true;
 
-  const reader = new FileReader();
+    const reader = new FileReader();
 
-  reader.onload = () => {
-    try {
-      if (mesh) {
-        scene.remove(mesh);
-        mesh.geometry.dispose();
-        mesh.material.dispose();
+    reader.onload = () => {
+      try {
+        if (mesh) {
+          scene.remove(mesh);
+          mesh.geometry.dispose();
+          mesh.material.dispose();
+        }
+
+        const geometry = loader.parse(reader.result);
+        geometry.computeVertexNormals();
+
+        modelInfo = getModelInfo(geometry);
+        frameModel(geometry);
+
+        const material = new THREE.MeshStandardMaterial({
+          color: 0x808080,
+          metalness: 0.15,
+          roughness: 0.55,
+        });
+
+        mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
+
+        const uploadBox = document.getElementsByClassName("upload-box")[0];
+        const dropText = document.getElementById("Droptext");
+
+        if (uploadBox) uploadBox.style.display = "none";
+        if (dropText) dropText.style.display = "none";
+
+        // Refresh bounds in case container dimensions changed on file upload
+        resizeRenderer();
+
+        if (aiStatus) aiStatus.textContent = "Model ready. Click Analyze model.";
+        if (analyzeButton) analyzeButton.disabled = false;
+      } catch (error) {
+        console.error(error);
+        if (aiStatus) aiStatus.textContent = "Could not load that STL file.";
       }
+    };
 
-      const geometry = loader.parse(reader.result);
-      geometry.computeVertexNormals();
+    reader.readAsArrayBuffer(file);
+  });
+}
 
-      // Get facts before centering the geometry.
-      modelInfo = getModelInfo(geometry);
-      frameModel(geometry);
+if (analyzeButton) {
+  analyzeButton.addEventListener("click", async () => {
+    if (!mesh || !modelInfo) return;
 
-      const material = new THREE.MeshStandardMaterial({
-        color: 0x808080,
-        metalness: 0.15,
-        roughness: 0.55,
+    analyzeButton.disabled = true;
+    if (aiStatus) aiStatus.textContent = "Groq is analyzing the model...";
+    if (aiOverview) aiOverview.textContent = "";
+
+    renderer.render(scene, camera);
+    const screenshot = renderer.domElement.toDataURL("image/jpeg", 0.85);
+
+    try {
+      const response = await fetch("/api/model-overview", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          screenshot,
+          modelInfo,
+        }),
       });
 
-      mesh = new THREE.Mesh(geometry, material);
-      scene.add(mesh);
+      const data = await response.json();
 
-      // Keeps compatibility with your existing upload UI.
-      const uploadBox = document.getElementsByClassName("upload-box")[0];
-      const dropText = document.getElementById("Droptext");
+      if (!response.ok) {
+        throw new Error(data.error || "AI analysis failed.");
+      }
 
-      if (uploadBox) uploadBox.style.display = "none";
-      if (dropText) dropText.style.display = "none";
-
-      aiStatus.textContent = "Model ready. Click Analyze model.";
-      analyzeButton.disabled = false;
+      if (aiOverview) aiOverview.textContent = data.overview;
+      if (aiStatus) aiStatus.textContent = "Analysis complete.";
     } catch (error) {
       console.error(error);
-      aiStatus.textContent = "Could not load that STL file.";
+      if (aiStatus) aiStatus.textContent = `Analysis failed: ${error.message}`;
+    } finally {
+      analyzeButton.disabled = false;
     }
-  };
-
-  reader.readAsArrayBuffer(file);
-});
-
-analyzeButton.addEventListener("click", async () => {
-  if (!mesh || !modelInfo) return;
-
-  analyzeButton.disabled = true;
-  aiStatus.textContent = "Groq is analyzing the model...";
-  aiOverview.textContent = "";
-
-  // Screenshot of only the Three.js viewer canvas.
-  renderer.render(scene, camera);
-  const screenshot = renderer.domElement.toDataURL("image/jpeg", 0.85);
-
-  try {
-    const response = await fetch("/api/model-overview", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        screenshot,
-        modelInfo,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "AI analysis failed.");
-    }
-
-    aiOverview.textContent = data.overview;
-    aiStatus.textContent = "Analysis complete.";
-  } catch (error) {
-    console.error(error);
-    aiStatus.textContent = `Analysis failed: ${error.message}`;
-  } finally {
-    analyzeButton.disabled = false;
-  }
-});
+  });
+}
 
 function animate() {
   requestAnimationFrame(animate);
-
   controls.update();
   renderer.render(scene, camera);
 }

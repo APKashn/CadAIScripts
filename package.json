@@ -4,16 +4,29 @@
     "private": true,
     "type": "module",
     "scripts": {
-      "dev": "concurrently \"vite\" \"node server.mjs\""
+        "dev": "concurrently \"vite\" \"node server.mjs\""
     },
     "dependencies": {
-      "dotenv": "^16.4.7",
-      "express": "^4.21.2",
-      "groq-sdk": "^0.18.0",
-      "three": "^0.174.0"
+        "dotenv": "^16.6.1",
+        "express": "^4.22.2",
+        "groq-sdk": "^0.18.0",
+        "three": "^0.174.0"
     },
     "devDependencies": {
-      "concurrently": "^9.1.2",
-      "vite": "^6.2.0"
-    }
-  }
+        "concurrently": "^9.1.2",
+        "vite": "^6.2.0"
+    },
+    "description": "",
+    "main": "main.js",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/APKashn/CadAIScripts.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/APKashn/CadAIScripts/issues"
+    },
+    "homepage": "https://github.com/APKashn/CadAIScripts#readme"
+}
