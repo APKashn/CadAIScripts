@@ -5,19 +5,18 @@
         <meta charset="UTF-8">
         <title>AI CAD Evaluator</title>
         <link rel="stylesheet" href="style.css"> 
-
+        <script type="importmap">
+          {
+            "imports": {
+              "three": "/node_modules/three/build/three.module.js",
+              "three/addons/": "/node_modules/three/examples/jsm/"
+            }
+          }
+        </script>
     </head>
 
     <body>
-        <script type="importmap">
-            
-            {
-                "imports": {
-                  "three": "https://unpkg.com/three@0.180.0/build/three.module.js",
-                  "three/addons/": "https://unpkg.com/three@0.180.0/examples/jsm/"
-                }
-              }
-        </script>
+        
 
         <div id="scene-container"></div>
 

@@ -11,18 +11,23 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Essential: Allow large payloads because base64 screenshots can be several megabytes
 app.use(express.json({ limit: "10mb" }));
 
-// Serve static frontend files (HTML, main.js, CSS, etc.)
+// 1. Serve static frontend files
 app.use(express.static(__dirname));
 
-// Backend route handling POST requests from analyzeButton
+// 2. SERVE NODE_MODULES FOR LOCAL THREE.JS IMPORTS (Fixes CORS!)
+app.use("/node_modules", express.static(path.join(__dirname, "node_modules")));
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+
 app.post("/api/model-overview", async (req, res) => {
   try {
     const { screenshot, modelInfo } = req.body;
-
     const apiKey = process.env.GROQ_API_KEY;
+
     if (!apiKey) {
       return res.status(500).json({ error: "GROQ_API_KEY is not set in environment variables." });
     }
@@ -41,13 +46,11 @@ app.post("/api/model-overview", async (req, res) => {
             content: [
               {
                 type: "text",
-                text: `Analyze this 3D STL model. Dimensions: ${modelInfo.dimensions.width}x${modelInfo.dimensions.height}x${modelInfo.dimensions.depth}. Vertices: ${modelInfo.vertices}, Triangles: ${modelInfo.triangles}. Provide a concise structural summary and functional overview.`
+                text: `Analyze this 3D STL model. Dimensions: ${modelInfo.dimensions.width}x${modelInfo.dimensions.height}x${modelInfo.dimensions.depth}. Vertices: ${modelInfo.vertices}, Triangles: ${modelInfo.triangles}.`
               },
               {
                 type: "image_url",
-                image_url: {
-                  url: screenshot
-                }
+                image_url: { url: screenshot }
               }
             ]
           }
@@ -57,18 +60,12 @@ app.post("/api/model-overview", async (req, res) => {
     });
 
     const data = await groqResponse.json();
-
     if (!groqResponse.ok) {
-      return res.status(groqResponse.status).json({
-        error: data.error?.message || "Groq API request failed."
-      });
+      return res.status(groqResponse.status).json({ error: data.error?.message || "Groq error" });
     }
 
-    const overview = data.choices?.[0]?.message?.content || "No analysis generated.";
-    res.json({ overview });
-
+    res.json({ overview: data.choices?.[0]?.message?.content || "No analysis available." });
   } catch (error) {
-    console.error("Server Error:", error);
     res.status(500).json({ error: error.message });
   }
 });

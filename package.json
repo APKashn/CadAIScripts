@@ -1,32 +1,15 @@
 {
-    "name": "stl-ai-viewer",
+    "name": "stl-analyzer",
     "version": "1.0.0",
-    "private": true,
     "type": "module",
+    "main": "server.mjs",
     "scripts": {
-        "dev": "concurrently \"vite\" \"node server.mjs\""
+        "start": "node server.mjs",
+        "dev": "node --watch server.mjs"
     },
     "dependencies": {
-        "dotenv": "^16.6.1",
-        "express": "^4.22.2",
-        "groq-sdk": "^0.18.0",
-        "three": "^0.174.0"
-    },
-    "devDependencies": {
-        "concurrently": "^9.1.2",
-        "vite": "^6.2.0"
-    },
-    "description": "",
-    "main": "main.js",
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/APKashn/CadAIScripts.git"
-    },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
-    "bugs": {
-        "url": "https://github.com/APKashn/CadAIScripts/issues"
-    },
-    "homepage": "https://github.com/APKashn/CadAIScripts#readme"
+        "dotenv": "^16.4.5",
+        "express": "^4.19.2",
+        "three": "^0.160.1"
+    }
 }
