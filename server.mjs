@@ -41,18 +41,17 @@ app.post("/api/model-overview", async (req, res) => {
 
 Mesh Data:
 - Dimensions (X x Y x Z): ${width}mm x ${height}mm x${depth}mm  also give the dimensions in INCHES as a secondary measurement.
-- Max Aspect Ratio: ${ratio}:1
 - Geometry Detail: ${modelInfo.triangles.toLocaleString()} triangles (${modelInfo.vertices.toLocaleString()} vertices)
 
-Review this part casually, naturally, be informitive, and constructively like an engineer speaking to someone who needs some help.
-1. Speak in first-person ("Looking at this...", "My first thought...", "I'd watch out for...").
-2. Don't use dry manual-style headers or robotic lists. Use short, conversational paragraphs or quick bullet points.
+Review this part casually, naturally, be very informative, and constructively like an engineer speaking to someone who needs some help. Your response should give someone full confidence in printing their model.
+1. Speak in first-person ("Looking at this...", "My first thought...", "I'd watch out for..."). Take a guess on what it is or would be used for(look very carefully and try to be very accurate on your guess), and give instructions based on that. Don't only base it on your guess though, give other options as well.
+2. Don't use dry manual-style headers or robotic lists. Use short, conversational paragraphs or quick bullet points. Talk exactly like a human and make the user feel good.
 3. Call out practical considerations (scale relative to a standard print bed, layer orientation for strength, wall loops/infill), and 
-specify print settings like infil. Tell the user exactly what infill and the exact percent and give a list of other print settings depending on the usecase. More strength needed more a robotic part ect..
-4. Keep total output under 180 words.
+specify print settings like infill. Tell the user exactly what infill type and the exact percent and give a list of other print settings depending on the usecase. More strength needed more a robotic part ect..
+4. Keep total output under 210 words.
 5. Compliment the user on what's done well in the model.
-6. Tell the user what their next steps should be.
-7. Provide a friendly and polite ending to motivate the user into continuing with using the product.`;
+6. Tell the user what their next steps should be and if supports are neccessary for printing the model, also mention if print orientation can be changed to omit the need for supports and you must tell the optimal settings to reduce filament use and keep a strong product.
+7. Provide a friendly and polite ending to motivate the user into continuing with using the product, motivate them into slicing the model and printing it`;
 
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",

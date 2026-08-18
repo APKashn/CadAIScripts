@@ -37,18 +37,20 @@
                   stroke-linecap="round"
                 />
               </svg>
-            <strong style="font-family: monospace;">Upload an STL model</strong>
+            <strong style="font-family: monospace; font-size: large; color: rgb(199, 210, 255);">Upload any .STL file here</strong>
            
-            <span style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;">Click to browse</span>
+            <span style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; color: rgb(199, 210, 255);">Click to browse</span>
             <input id="file-input" type="file" accept=".STL, .3mf" hidden>
 
         </label>
 
         <center><input type = "text" class="inputfield" placeholder="What should I look for?"></center>
         
-        <button id="enterbutton" disabled>Go!</button>
+        <button id="enterbutton" style="color: white; font-family: monospace;" disabled>Submit</button>
+
         <p id="ai-status" style="color: white;"></p>
-        <pre id="ai-overview" style="color: white;"></pre>
+        <pre id="ai-overview" style="color: white; font-family: monospace;"></pre>
+
         <script src="main.js" type="module" defer></script>
 
 </script>

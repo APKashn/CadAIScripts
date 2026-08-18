@@ -11,12 +11,11 @@ const aiStatus = document.getElementById("ai-status");
 const aiOverview = document.getElementById("ai-overview");
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xffffff);
+scene.background = new THREE.Color(0x121212);
 
 const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
 camera.position.set(0, 0, 100);
 
-// preserveDrawingBuffer allows capturing canvas screenshots
 const renderer = new THREE.WebGLRenderer({
   antialias: true,
   preserveDrawingBuffer: true,
@@ -25,18 +24,30 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 container.appendChild(renderer.domElement);
 
-// Ensure renderer element takes full size of parent container
 renderer.domElement.style.width = "100%";
 renderer.domElement.style.height = "100%";
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 
-scene.add(new THREE.HemisphereLight(0xffffff, 0x333333, 3));
+// --- EVEN STUDIO LIGHTING SETUP (NO DARK SPOTS) ---
+// Ambient light raises overall scene luminance
+const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+scene.add(ambientLight);
 
-const light = new THREE.DirectionalLight(0xffffff, 3);
-light.position.set(10, 20, 15);
-scene.add(light);
+// Key directional light (front-right)
+const keyLight = new THREE.DirectionalLight(0xffffff, 1.5);
+keyLight.position.set(100, 100, 100);
+scene.add(keyLight);
+
+// Fill directional light (back-left-bottom)
+const fillLight = new THREE.DirectionalLight(0xffffff, 1.0);
+fillLight.position.set(-100, -50, -100);
+scene.add(fillLight);
+
+// Top-down hemisphere sky/ground light
+const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.0);
+scene.add(hemiLight);
 
 const loader = new STLLoader();
 
@@ -65,7 +76,7 @@ function getModelInfo(geometry) {
   const positions = geometry.getAttribute("position");
 
   return {
-    units: "unknown — STL files do not store unit information",
+    units: "mm (estimated)",
     dimensions: {
       width: Number(size.x.toFixed(2)),
       height: Number(size.y.toFixed(2)),
@@ -115,15 +126,19 @@ if (input) {
         }
 
         const geometry = loader.parse(reader.result);
+        
+        // --- FIX Z-UP CAD ORIENTATION TO THREE.JS Y-UP ---
+        geometry.rotateX(-Math.PI / 2);
+        
         geometry.computeVertexNormals();
 
         modelInfo = getModelInfo(geometry);
         frameModel(geometry);
 
         const material = new THREE.MeshStandardMaterial({
-          color: 0x808080,
-          metalness: 0.15,
-          roughness: 0.55,
+          color: 0x909090,
+          metalness: 0.1,
+          roughness: 0.4,
         });
 
         mesh = new THREE.Mesh(geometry, material);
@@ -135,7 +150,6 @@ if (input) {
         if (uploadBox) uploadBox.style.display = "none";
         if (dropText) dropText.style.display = "none";
 
-        // Refresh bounds in case container dimensions changed on file upload
         resizeRenderer();
 
         if (aiStatus) aiStatus.textContent = "Model ready. Click Analyze model.";
@@ -155,7 +169,7 @@ if (analyzeButton) {
     if (!mesh || !modelInfo) return;
 
     analyzeButton.disabled = true;
-    if (aiStatus) aiStatus.textContent = "Groq is analyzing the model...";
+    if (aiStatus) aiStatus.textContent = "Analyzing your model...";
     if (aiOverview) aiOverview.innerText = "";
 
     renderer.render(scene, camera);
@@ -179,7 +193,6 @@ if (analyzeButton) {
         throw new Error(data.error || "AI analysis failed.");
       }
 
-      // Use innerText to respect line breaks and newlines in the response
       if (aiOverview) aiOverview.innerText = data.overview;
       if (aiStatus) aiStatus.textContent = "Analysis complete.";
     } catch (error) {
