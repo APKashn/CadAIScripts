@@ -147,12 +147,12 @@ if (input) {
         const uploadBox = document.getElementsByClassName("upload-box")[0];
         const dropText = document.getElementById("Droptext");
 
-        if (uploadBox) uploadBox.style.display = "none";
-        if (dropText) dropText.style.display = "none";
+        //if (uploadBox) uploadBox.style.display = "none";
+        //if (dropText) dropText.style.display = "none";
 
         resizeRenderer();
 
-        if (aiStatus) aiStatus.textContent = "Model ready. Click Analyze model.";
+        if (aiStatus) aiStatus.textContent = "Model ready. Click Submit.";
         if (analyzeButton) analyzeButton.disabled = false;
       } catch (error) {
         console.error(error);

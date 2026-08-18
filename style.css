@@ -15,7 +15,7 @@ body {
       font-family: sans-serif;
   
       border: 2px solid #ccc; 
-      box-shadow: 0px 0px 100px 45px rgba(23, 69, 236, 0.8);
+      box-shadow: 0px 0px 100px 26px rgba(23, 69, 236, 0.8);
 
       border-radius: 32px;          /* rounded corners */
   
@@ -40,6 +40,8 @@ body {
         z-index: 0;
         overflow: hidden;
         border-radius: 24px;
+        border-color: #0031f3;
+        border-width: 10px;
       }
       
       #scene-container canvas {
@@ -104,3 +106,55 @@ body {
     
   }
 
+ /* Scrollable Output Box Container */
+#output-container {
+  width: 29%;
+  max-width: 600px;
+  max-height: 400px;
+  margin: 20px auto;
+  padding: 18px;
+  margin-left: 70.5%;
+  background-color: #141414;
+  border: 1px solid #2d2d2d;
+  border-radius: 8px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* Status Text Styling */
+#ai-status {
+  color: #0070f3;
+  font-family: monospace;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+#ai-overview {
+  color: #e0e0e0;
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Custom Dark Theme Scrollbar */
+#output-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+#output-container::-webkit-scrollbar-track {
+  background: #1e1e1e;
+  border-radius: 4px;
+}
+
+#output-container::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 4px;
+}
+
+#output-container::-webkit-scrollbar-thumb:hover {
+  background: #0070f3;
+}

@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-
 <html lang="en">
     <head>
         <meta charset="UTF-8">
         <title>AI CAD Evaluator</title>
+        <link rel="icon" href="/favicon.png" type="image/x-icon">
+
         <link rel="stylesheet" href="style.css"> 
         <script type="importmap">
           {
@@ -13,11 +14,11 @@
             }
           }
         </script>
+        
     </head>
 
     <body>
         
-
         <div id="scene-container"></div>
 
         <center><h1 id="Droptext" style="color:rgb(255, 255, 255); font-family: monospace;">3D Viewer</h1></center>
@@ -44,15 +45,15 @@
 
         </label>
 
-        <input type = "text" class="inputfield" placeholder="What should I look for?">
+        <input type="text" class="inputfield" placeholder="What should I look for?">
         
         <button id="enterbutton" style="color: white; font-family: monospace;" disabled>Submit</button>
 
-        <p id="ai-status" style="color: white;"></p>
-        <pre id="ai-overview" style="color: white; font-family: monospace;"></pre>
+        <div id="output-container">
+            <p id="ai-status"></p>
+            <pre id="ai-overview"></pre>
+        </div>
 
         <script src="main.js" type="module" defer></script>
-
-</script>
 </body>
 </html>
