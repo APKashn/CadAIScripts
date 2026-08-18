@@ -7,10 +7,11 @@ body {
   }
   
   .inputfield {
-      width: 520px;
+      width: 350px;
       height: 55px;
+      margin-left: 73%;
       font-size:17px;
-      margin-top: 560px;
+      margin-top: 200px;
       font-family: sans-serif;
   
       border: 2px solid #ccc; 
@@ -30,11 +31,11 @@ body {
     }
     #scene-container {
         position: fixed;
-        top: 80px;
-        right: 0px;
+        top: 8%;
+        right: 30%;
       
-        width: 100%;
-        height: 400px;
+        width: 70%;
+        height: 92%;
       
         z-index: 0;
         overflow: hidden;
@@ -49,12 +50,12 @@ body {
       
     .upload-box {
       position: fixed;
-      top: 35%;
-      left: 50%;
+      top: 15%;
+      left: 85%;
       transform: translate(-50%, -50%);
     
-      width: 570px;
-      height: 230px;
+      width: 370px;
+      height: 130px;
       padding: 24px;
       box-sizing: content-box;
     
@@ -89,15 +90,14 @@ body {
     height:40px;
     border-radius: 32px;
     border:none;
-    left: 60%;
-    transform: translate(1700%, -130%);
+    margin-left: 83%;
     
     background-color: #009dff;
   
   }
 
 #Droptext {
-
+  margin-left: -30%;
 }
   #enterbutton:hover {
     background-color: #3547e6;

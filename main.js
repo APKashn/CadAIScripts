@@ -11,7 +11,7 @@ const aiStatus = document.getElementById("ai-status");
 const aiOverview = document.getElementById("ai-overview");
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x121212);
+scene.background = new THREE.Color(0x000000);
 
 const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
 camera.position.set(0, 0, 100);
