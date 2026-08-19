@@ -11,10 +11,11 @@
             "imports": {
               "three": "/node_modules/three/build/three.module.js",
               "three/addons/": "/node_modules/three/examples/jsm/"
+            
             }
           }
         </script>
-        
+        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     </head>
 
     <body>
@@ -51,7 +52,7 @@
 
         <div id="output-container">
             <p id="ai-status"></p>
-            <pre id="ai-overview"></pre>
+            <div id="ai-overview"></div>
         </div>
 
         <script src="main.js" type="module" defer></script>

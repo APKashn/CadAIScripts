@@ -1,213 +1,164 @@
-import * as THREE from "three";
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { STLLoader } from "three/addons/loaders/STLLoader.js";
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { STLLoader } from 'three/addons/loaders/STLLoader.js';
 
-const input = document.getElementById("file-input");
-const fileName = document.getElementById("file-name");
-const container = document.getElementById("scene-container");
+let scene, camera, renderer, controls, currentMesh;
+let modelInfo = null;
 
-const analyzeButton = document.getElementById("enterbutton");
+const sceneContainer = document.getElementById("scene-container");
+const fileInput = document.getElementById("file-input");
+const enterButton = document.getElementById("enterbutton");
+const inputField = document.querySelector(".inputfield");
 const aiStatus = document.getElementById("ai-status");
 const aiOverview = document.getElementById("ai-overview");
 
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x000000);
+function initScene() {
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x001000);
 
-const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
-camera.position.set(0, 0, 100);
+    camera = new THREE.PerspectiveCamera(
+        45,
+        sceneContainer.clientWidth / sceneContainer.clientHeight,
+        0.1,
+        1000
+    );
+    camera.position.set(100, 100, 100);
 
-const renderer = new THREE.WebGLRenderer({
-  antialias: true,
-  preserveDrawingBuffer: true,
-});
+    // preserveDrawingBuffer: true allows capturing canvas screenshots with .toDataURL()
+    renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+    renderer.setSize(sceneContainer.clientWidth, sceneContainer.clientHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    sceneContainer.appendChild(renderer.domElement);
 
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-container.appendChild(renderer.domElement);
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
 
-renderer.domElement.style.width = "100%";
-renderer.domElement.style.height = "100%";
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+    scene.add(ambientLight);
 
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
+    const dirLight1 = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight1.position.set(1, 1, 1).normalize();
+    scene.add(dirLight1);
 
-// --- EVEN STUDIO LIGHTING SETUP (NO DARK SPOTS) ---
-// Ambient light raises overall scene luminance
-const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
-scene.add(ambientLight);
+    const dirLight2 = new THREE.DirectionalLight(0x555555, 0.5);
+    dirLight2.position.set(-1, -1, -1).normalize();
+    scene.add(dirLight2);
 
-// Key directional light (front-right)
-const keyLight = new THREE.DirectionalLight(0xffffff, 1.5);
-keyLight.position.set(100, 100, 100);
-scene.add(keyLight);
-
-// Fill directional light (back-left-bottom)
-const fillLight = new THREE.DirectionalLight(0xffffff, 1.0);
-fillLight.position.set(-100, -50, -100);
-scene.add(fillLight);
-
-// Top-down hemisphere sky/ground light
-const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.0);
-scene.add(hemiLight);
-
-const loader = new STLLoader();
-
-let mesh = null;
-let modelInfo = null;
-
-function resizeRenderer() {
-  const width = container.clientWidth;
-  const height = container.clientHeight;
-
-  if (width === 0 || height === 0) return;
-
-  renderer.setSize(width, height, false);
-  camera.aspect = width / height;
-  camera.updateProjectionMatrix();
-}
-
-window.addEventListener("resize", resizeRenderer);
-resizeRenderer();
-
-function getModelInfo(geometry) {
-  geometry.computeBoundingBox();
-
-  const box = geometry.boundingBox;
-  const size = box.getSize(new THREE.Vector3());
-  const positions = geometry.getAttribute("position");
-
-  return {
-    units: "mm (estimated)",
-    dimensions: {
-      width: Number(size.x.toFixed(2)),
-      height: Number(size.y.toFixed(2)),
-      depth: Number(size.z.toFixed(2)),
-    },
-    vertices: positions.count,
-    triangles: geometry.index
-      ? geometry.index.count / 3
-      : positions.count / 3,
-  };
-}
-
-function frameModel(geometry) {
-  geometry.computeBoundingBox();
-
-  const size = geometry.boundingBox.getSize(new THREE.Vector3());
-  const diagonal = Math.max(size.length(), 1);
-  const distance = diagonal * 1.6;
-
-  geometry.center();
-
-  camera.position.set(distance, distance * 0.7, distance);
-  camera.lookAt(0, 0, 0);
-
-  controls.target.set(0, 0, 0);
-  controls.update();
-}
-
-if (input) {
-  input.addEventListener("change", (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    if (fileName) fileName.textContent = file.name;
-    if (aiStatus) aiStatus.textContent = "Loading STL model...";
-    if (aiOverview) aiOverview.innerText = "";
-    if (analyzeButton) analyzeButton.disabled = true;
-
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      try {
-        if (mesh) {
-          scene.remove(mesh);
-          mesh.geometry.dispose();
-          mesh.material.dispose();
-        }
-
-        const geometry = loader.parse(reader.result);
-        
-        // --- FIX Z-UP CAD ORIENTATION TO THREE.JS Y-UP ---
-        geometry.rotateX(-Math.PI / 2);
-        
-        geometry.computeVertexNormals();
-
-        modelInfo = getModelInfo(geometry);
-        frameModel(geometry);
-
-        const material = new THREE.MeshStandardMaterial({
-          color: 0x909090,
-          metalness: 0.1,
-          roughness: 0.4,
-        });
-
-        mesh = new THREE.Mesh(geometry, material);
-        scene.add(mesh);
-
-        const uploadBox = document.getElementsByClassName("upload-box")[0];
-        const dropText = document.getElementById("Droptext");
-
-        //if (uploadBox) uploadBox.style.display = "none";
-        //if (dropText) dropText.style.display = "none";
-
-        resizeRenderer();
-
-        if (aiStatus) aiStatus.textContent = "Model ready. Click Submit.";
-        if (analyzeButton) analyzeButton.disabled = false;
-      } catch (error) {
-        console.error(error);
-        if (aiStatus) aiStatus.textContent = "Could not load that STL file.";
-      }
-    };
-
-    reader.readAsArrayBuffer(file);
-  });
-}
-
-if (analyzeButton) {
-  analyzeButton.addEventListener("click", async () => {
-    if (!mesh || !modelInfo) return;
-
-    analyzeButton.disabled = true;
-    if (aiStatus) aiStatus.textContent = "Analyzing your model...";
-    if (aiOverview) aiOverview.innerText = "";
-
-    renderer.render(scene, camera);
-    const screenshot = renderer.domElement.toDataURL("image/jpeg", 0.85);
-
-    try {
-      const response = await fetch("/api/model-overview", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          screenshot,
-          modelInfo,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "AI analysis failed.");
-      }
-
-      if (aiOverview) aiOverview.innerText = data.overview;
-      if (aiStatus) aiStatus.textContent = "Analysis complete.";
-    } catch (error) {
-      console.error(error);
-      if (aiStatus) aiStatus.textContent = `Analysis failed: ${error.message}`;
-    } finally {
-      analyzeButton.disabled = false;
-    }
-  });
+    window.addEventListener("resize", onWindowResize);
+    animate();
 }
 
 function animate() {
-  requestAnimationFrame(animate);
-  controls.update();
-  renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
 }
 
-animate();
+function onWindowResize() {
+    camera.aspect = sceneContainer.clientWidth / sceneContainer.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(sceneContainer.clientWidth, sceneContainer.clientHeight);
+}
+
+// STL File Loader
+fileInput.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.readAsArrayBuffer(file);
+    reader.onload = function (event) {
+        const contents = event.target.result;
+        const loader = new STLLoader();
+        const geometry = loader.parse(contents);
+
+        if (currentMesh) scene.remove(currentMesh);
+
+        // Center geometry on its local origin
+        geometry.computeBoundingBox();
+        geometry.center();
+
+        const material = new THREE.MeshStandardMaterial({
+            color: 0x90caf9,
+            roughness: 0.4,
+            metalness: 0.2
+        });
+
+        currentMesh = new THREE.Mesh(geometry, material);
+
+        // FIX: Rotate -90 degrees around X-axis to convert CAD Z-up to Three.js Y-up
+        currentMesh.rotation.x = -Math.PI / 2;
+
+        scene.add(currentMesh);
+
+        // Calculate size metrics from raw geometry bounds
+        const bbox = geometry.boundingBox;
+        const size = new THREE.Vector3();
+        bbox.getSize(size);
+        const maxDim = Math.max(size.x, size.y, size.z);
+
+        // Position camera relative to upright model
+        camera.position.set(maxDim * 1.8, maxDim * 1.8, maxDim * 1.8);
+        camera.lookAt(0, 0, 0);
+
+        modelInfo = {
+            dimensions: {
+                width: size.x.toFixed(2),
+                height: size.y.toFixed(2),
+                depth: size.z.toFixed(2)
+            },
+            triangles: geometry.attributes.position.count / 3,
+            vertices: geometry.attributes.position.count
+        };
+
+        enterButton.disabled = false;
+        aiStatus.textContent = "Model loaded successfully. Ready to analyze.";
+        aiOverview.textContent = "";
+    };
+});
+
+// Capture Canvas & Call Server API
+enterButton.addEventListener("click", async () => {
+    if (!currentMesh || !modelInfo) return;
+
+    enterButton.disabled = true;
+    aiStatus.textContent = "Analyzing model visual geometry & properties...";
+    aiOverview.textContent = "";
+
+    renderer.render(scene, camera);
+    const screenshotDataUrl = renderer.domElement.toDataURL("image/png");
+    const userPromptText = inputField.value.trim();
+
+    try {
+        const response = await fetch("/api/model-overview", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                screenshot: screenshotDataUrl,
+                modelInfo: modelInfo,
+                userPrompt: userPromptText
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Failed to evaluate model.");
+        }
+
+        aiStatus.textContent = "Analysis Complete:";
+        aiOverview.innerHTML = marked.parse(data.overview);
+
+    } catch (err) {
+        console.error(err);
+        aiStatus.textContent = "Error during analysis:";
+        aiOverview.textContent = err.message;
+    } finally {
+        enterButton.disabled = false;
+    }
+});
+
+initScene();

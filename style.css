@@ -32,7 +32,7 @@ body {
     #scene-container {
         position: fixed;
         top: 8%;
-        right: 30%;
+        right: 42%;
       
         width: 70%;
         height: 92%;
@@ -53,7 +53,7 @@ body {
     .upload-box {
       position: fixed;
       top: 15%;
-      left: 85%;
+      left: 79%;
       transform: translate(-50%, -50%);
     
       width: 370px;
@@ -108,12 +108,12 @@ body {
 
  /* Scrollable Output Box Container */
 #output-container {
-  width: 29%;
+  width: 42%;
   max-width: 600px;
   max-height: 400px;
   margin: 20px auto;
   padding: 18px;
-  margin-left: 70.5%;
+  margin-left: 58.5%;
   background-color: #141414;
   border: 1px solid #2d2d2d;
   border-radius: 8px;
