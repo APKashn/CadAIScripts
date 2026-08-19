@@ -11,6 +11,7 @@ const enterButton = document.getElementById("enterbutton");
 const inputField = document.querySelector(".inputfield");
 const aiStatus = document.getElementById("ai-status");
 const aiOverview = document.getElementById("ai-overview");
+const Reload = document.getElementById("reload");
 
 function initScene() {
     scene = new THREE.Scene();
@@ -61,8 +62,8 @@ function onWindowResize() {
     renderer.setSize(sceneContainer.clientWidth, sceneContainer.clientHeight);
 }
 
-// STL File Loader
-fileInput.addEventListener("change", (e) => {
+// Reusable STL File Handler
+function handleFileSelect(e) {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -86,13 +87,13 @@ fileInput.addEventListener("change", (e) => {
         });
 
         currentMesh = new THREE.Mesh(geometry, material);
-
-        // FIX: Rotate -90 degrees around X-axis to convert CAD Z-up to Three.js Y-up
+        // fix to make models render in correctly, instead of upside down, sideways ect
         currentMesh.rotation.x = -Math.PI / 2;
 
         scene.add(currentMesh);
-        document.getElementsByClassName("upload-box")[0].style.display ="none";
-
+        document.getElementsByClassName("upload-box")[0].style.display = "none";
+        Reload.style.display = "flex";
+        
         // Calculate size metrics from raw geometry bounds
         const bbox = geometry.boundingBox;
         const size = new THREE.Vector3();
@@ -117,7 +118,19 @@ fileInput.addEventListener("change", (e) => {
         aiStatus.textContent = "Model loaded successfully. Ready to submit.";
         aiOverview.textContent = "";
     };
-});
+}
+
+// Method 1: Attaching the shared handler to both inputs
+// Listen for file selections on the input
+fileInput.addEventListener("change", handleFileSelect);
+
+// Make the Reload button open the file selector when clicked
+if (Reload) {
+    Reload.addEventListener("click", () => {
+        fileInput.value = ""; // Reset value so re-uploading the same file still fires the change event
+        fileInput.click();
+    });
+}
 
 // Capture Canvas & Call Server API
 enterButton.addEventListener("click", async () => {

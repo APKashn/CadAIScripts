@@ -7,16 +7,16 @@ body {
   }
   
   .inputfield {
-      width: 350px;
+      width: 450px;
       height: 55px;
-      margin-left: 63%;
+      margin-left: 59%;
       font-size:17px;
     
       font-family: sans-serif;
       position: relative;
-      top: 520px;
+      top: 560px;
       border: 1px solid #ffffff; 
-      box-shadow: 0px 0px 100px 26px rgba(23, 69, 236, 0.8);
+      box-shadow: 0px 0px 40px 10px rgba(23, 69, 236, 0.8);
       background-color: #20202067;  
       color: white;
       border-radius: 32px;          /* rounded corners */
@@ -61,26 +61,22 @@ body {
       
         width: 370px;
         height: 130px;
-        padding: 24px;
-        /* Switched to border-box to keep exact dimensions predictable */
-        box-sizing: border-box; 
+        padding: 18px 24px;
+        box-sizing: border-box;
       
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 8px; /* Reduced gap so text fits cleanly inside 130px height */
+        gap: 8px;
       
-        color: #e0e6ff;
-        background: #0d0d11; /* Slight elevated dark tone instead of pitch black */
-        border-radius: 28px;
+        background: #0d0e12;
+        border-radius: 20px;
         cursor: pointer;
         text-align: center;
         
-        /* Smooth transitions for hover interactions */
-        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
-                    box-shadow 0.25s ease, 
-                    background-color 0.25s ease;
+        /* Smooth transitions */
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       }
       
       .dashed-border {
@@ -92,38 +88,64 @@ body {
       }
       
       .dashed-border rect {
-        /* Smooth transition for stroke color changes */
-        transition: stroke 0.25s ease, stroke-dashoffset 0.3s ease;
+        transition: stroke 0.25s ease, stroke-dasharray 0.25s ease;
+      }
+      
+      .upload-icon {
+        transition: transform 0.25s ease, stroke 0.25s ease;
+      }
+      
+      .upload-text {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+      
+      .upload-title {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-size: 15px;
+        font-weight: 600;
+        color: #ffffff;
+      }
+      
+      .upload-title .highlight {
+        color: #00d4ff;
+        font-family: monospace;
+      }
+      
+      .upload-subtitle {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-size: 12px;
+        color: #71717a;
       }
       
       /* Hover State */
       .upload-box:hover {
-        transform: translate(-50%, -52%); /* Gentle upward float */
-        background: #13141f;
-        box-shadow: 0 8px 24px rgba(0, 157, 255, 0.15); /* Soft glowing aura */
+        background: #12141c;
+        transform: translate(-50%, -52%);
+        box-shadow: 0 12px 32px rgba(0, 157, 255, 0.18);
       }
       
       .upload-box:hover .dashed-border rect {
-        stroke: #00d4ff; /* Brighter neon blue highlight on hover */
+        stroke: #0070f3;
+        stroke-dasharray: 6 6;
       }
       
-      /* Click/Active State */
-      .upload-box:active {
-        transform: translate(-50%, -49%); /* Press-down tactile effect */
-        box-shadow: 0 4px 12px rgba(0, 157, 255, 0.1);
+      .upload-box:hover .upload-icon {
+        transform: translateY(-3px);
+        stroke: #0051ff;
       }
-    
   
     #enterbutton {
       width: 60px;
       height: 40px;
       border-radius: 8px;
       border: none;
-      margin-left: 92%;
+      margin-left: 94%;
       color: #ffffff;
       cursor: pointer;
       position: relative;
-      top: 470px;
+      top: 506px;
     
       /* Linear Gradient (Angle, Color 1, Color 2) */
       background: linear-gradient(135deg, #0051ff, #00d4ff);
@@ -154,11 +176,10 @@ body {
  /* Scrollable Output Box Container */
  #output-container {
   width: 42%;
-  height: 800px;
+  height: 550px;
   max-width: 600px;
-  max-height: 400px;
+  max-height: 550px;
   
-  /* MOVES IT UP */
   margin-top: -110px; /* Adjust this number (e.g. -10px, -20px, 0px) */
   margin-left: 58.5%;
   
@@ -207,4 +228,45 @@ body {
 
 #output-container::-webkit-scrollbar-thumb:hover {
   background: #0070f3;
+}
+
+
+#reload {
+  position: absolute;
+  top: 60px;
+  left: 715px;
+  
+  display: none;
+  /* Sizing & Shape */
+  padding: 10px 18px;
+  border-radius: 14px;
+  font-family: monospace;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  
+  /* Colors & Glassmorphism */
+  color: #e0e6ff;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  
+  /* Smooth Animation Transitions */
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Hover State: Glowing border & slight lift */
+#reload:hover {
+  background: rgba(0, 112, 243, 0.15);
+  border-color: #0070f3;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 112, 243, 0.35);
+}
+
+/* Active Click State: Tactile press down */
+#reload:active {
+  transform: translateY(0px) scale(0.96);
+  box-shadow: 0 2px 8px rgba(0, 112, 243, 0.2);
 }
