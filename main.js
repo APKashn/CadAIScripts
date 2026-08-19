@@ -14,7 +14,7 @@ const aiOverview = document.getElementById("ai-overview");
 
 function initScene() {
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x001000);
+    scene.background = new THREE.Color(0x000000);
 
     camera = new THREE.PerspectiveCamera(
         45,
@@ -91,6 +91,7 @@ fileInput.addEventListener("change", (e) => {
         currentMesh.rotation.x = -Math.PI / 2;
 
         scene.add(currentMesh);
+        document.getElementsByClassName("upload-box")[0].style.display ="none";
 
         // Calculate size metrics from raw geometry bounds
         const bbox = geometry.boundingBox;
@@ -113,7 +114,7 @@ fileInput.addEventListener("change", (e) => {
         };
 
         enterButton.disabled = false;
-        aiStatus.textContent = "Model loaded successfully. Ready to analyze.";
+        aiStatus.textContent = "Model loaded successfully. Ready to submit.";
         aiOverview.textContent = "";
     };
 });

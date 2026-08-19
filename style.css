@@ -9,14 +9,16 @@ body {
   .inputfield {
       width: 350px;
       height: 55px;
-      margin-left: 73%;
+      margin-left: 63%;
       font-size:17px;
-      margin-top: 200px;
+    
       font-family: sans-serif;
-  
-      border: 2px solid #ccc; 
+      position: relative;
+      top: 520px;
+      border: 1px solid #ffffff; 
       box-shadow: 0px 0px 100px 26px rgba(23, 69, 236, 0.8);
-
+      background-color: #20202067;  
+      color: white;
       border-radius: 32px;          /* rounded corners */
   
   
@@ -25,24 +27,25 @@ body {
   .inputfield:focus {
   
       border-color: #0031f3;       /*glow*/  
-      background-color: #ffffff;  
    
       outline: none;                
     }
     #scene-container {
-        position: fixed;
-        top: 8%;
-        right: 42%;
+      position: fixed;
+      top: 8%;
+      right: 42%;
+    
+      width: 58%;
+      height: 92%;
+    
+      z-index: 0;
+      overflow: hidden;
+      border-radius: 24px;
       
-        width: 70%;
-        height: 92%;
-      
-        z-index: 0;
-        overflow: hidden;
-        border-radius: 24px;
-        border-color: #0031f3;
-        border-width: 10px;
-      }
+      /* WHITE BORDER EDIT */
+      border: 1px solid #ffffff;
+      box-sizing: border-box;
+    }
       
       #scene-container canvas {
         display: block;
@@ -50,56 +53,98 @@ body {
         height: 100%;
       }
       
-    .upload-box {
-      position: fixed;
-      top: 15%;
-      left: 79%;
-      transform: translate(-50%, -50%);
+      .upload-box {
+        position: fixed;
+        top: 50%;
+        left: 30%;
+        transform: translate(-50%, -50%);
+      
+        width: 370px;
+        height: 130px;
+        padding: 24px;
+        /* Switched to border-box to keep exact dimensions predictable */
+        box-sizing: border-box; 
+      
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px; /* Reduced gap so text fits cleanly inside 130px height */
+      
+        color: #e0e6ff;
+        background: #0d0d11; /* Slight elevated dark tone instead of pitch black */
+        border-radius: 28px;
+        cursor: pointer;
+        text-align: center;
+        
+        /* Smooth transitions for hover interactions */
+        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
+                    box-shadow 0.25s ease, 
+                    background-color 0.25s ease;
+      }
+      
+      .dashed-border {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+      
+      .dashed-border rect {
+        /* Smooth transition for stroke color changes */
+        transition: stroke 0.25s ease, stroke-dashoffset 0.3s ease;
+      }
+      
+      /* Hover State */
+      .upload-box:hover {
+        transform: translate(-50%, -52%); /* Gentle upward float */
+        background: #13141f;
+        box-shadow: 0 8px 24px rgba(0, 157, 255, 0.15); /* Soft glowing aura */
+      }
+      
+      .upload-box:hover .dashed-border rect {
+        stroke: #00d4ff; /* Brighter neon blue highlight on hover */
+      }
+      
+      /* Click/Active State */
+      .upload-box:active {
+        transform: translate(-50%, -49%); /* Press-down tactile effect */
+        box-shadow: 0 4px 12px rgba(0, 157, 255, 0.1);
+      }
     
-      width: 370px;
-      height: 130px;
-      padding: 24px;
-      box-sizing: content-box;
-    
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 19px;
-
-      color: #333;
-      background: #000000;
-      border-radius: 32px;
+  
+    #enterbutton {
+      width: 60px;
+      height: 40px;
+      border-radius: 8px;
+      border: none;
+      margin-left: 92%;
+      color: #ffffff;
       cursor: pointer;
-      text-align: center;
+      position: relative;
+      top: 470px;
+    
+      /* Linear Gradient (Angle, Color 1, Color 2) */
+      background: linear-gradient(135deg, #0051ff, #00d4ff);
+      
+      /* Smooth transition for hover effects */
+      transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
     }
     
-    .dashed-border {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
+    /* Slight lift and subtle glow when hovering */
+    #enterbutton:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 157, 255, 0.4);
     }
     
-    .upload-box:hover .dashed-border rect {
-      stroke: #8989c2;
+    /* Dim the gradient when the button is disabled */
+    #enterbutton:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
-    
-  
-  #enterbutton {
-    width:60px;
-    height:40px;
-    border-radius: 32px;
-    border:none;
-    margin-left: 83%;
-    
-    background-color: #009dff;
-  
-  }
-
 #Droptext {
-  margin-left: -30%;
+  margin-left: -40%;
 }
   #enterbutton:hover {
     background-color: #3547e6;
@@ -107,13 +152,17 @@ body {
   }
 
  /* Scrollable Output Box Container */
-#output-container {
+ #output-container {
   width: 42%;
+  height: 800px;
   max-width: 600px;
   max-height: 400px;
-  margin: 20px auto;
-  padding: 18px;
+  
+  /* MOVES IT UP */
+  margin-top: -110px; /* Adjust this number (e.g. -10px, -20px, 0px) */
   margin-left: 58.5%;
+  
+  padding: 18px;
   background-color: #141414;
   border: 1px solid #2d2d2d;
   border-radius: 8px;
@@ -138,6 +187,7 @@ body {
   margin: 0;
   font-size: 14px;
   line-height: 1.5;
+
 }
 
 /* Custom Dark Theme Scrollbar */
