@@ -399,3 +399,61 @@ main {
     border-color: #00d4ff;
   }
 }
+
+#toast-notification {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  background-color: #0f172a;
+  color: #f8fafc;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  
+  /* Blue outline styling */
+  border: 1px solid #00d4ff;
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.25);
+  
+  /* Positioning & layout */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* Checkmark icon badge */
+#toast-notification .toast-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: rgba(0, 212, 255, 0.15);
+  color: #00d4ff;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+/* Shown state */
+#toast-notification.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Warning override (optional) */
+#toast-notification.warning {
+  border-color: #ef4444;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.25);
+}
+
+#toast-notification.warning .toast-icon {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}

@@ -156,11 +156,23 @@ function handleFileSelect(e) {
         if (inputField) inputField.placeholder = "Tell me about your model...";
 
         enterButton.disabled = false;
-        aiStatus.innerHTML = "Model loaded successfully. <br><br><br><br>Ask a specific question or request a quick overview to get started.";
+        showToast("Model Loaded Successfully");
         aiOverview.textContent = "";
     };
 }
-
+function showToast(message, isWarning = false) {
+    const toast = document.getElementById('toast-notification');
+    if (!toast) return;
+  
+    const iconSymbol = isWarning ? '&#10007;' : '&#10003;'; // Cross if warning, checkmark if success
+    
+    toast.innerHTML = `<span class="toast-icon">${iconSymbol}</span><span>${message}</span>`;
+    toast.className = isWarning ? 'warning show' : 'show';
+  
+    setTimeout(() => {
+      toast.className = toast.className.replace('show', '').trim();
+    }, 3000);
+  }
 // Listen for file selections on the input
 fileInput.addEventListener("change", handleFileSelect);
 
