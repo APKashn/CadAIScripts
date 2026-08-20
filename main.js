@@ -156,7 +156,7 @@ function handleFileSelect(e) {
         if (inputField) inputField.placeholder = "Tell me about your model...";
 
         enterButton.disabled = false;
-        aiStatus.textContent = "Model loaded successfully. Ready to submit.";
+        aiStatus.innerHTML = "Model loaded successfully. <br><br><br><br>Ask a specific question or request a quick overview to get started.";
         aiOverview.textContent = "";
     };
 }
