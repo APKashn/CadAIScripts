@@ -4,6 +4,7 @@ import { STLLoader } from 'three/addons/loaders/STLLoader.js';
 
 let scene, camera, renderer, controls, currentMesh;
 let modelInfo = null;
+let cachedScreenshot = null; // Caches the initial screenshot to save API tokens
 
 const sceneContainer = document.getElementById("scene-container");
 const fileInput = document.getElementById("file-input");
@@ -12,10 +13,11 @@ const inputField = document.querySelector(".inputfield");
 const aiStatus = document.getElementById("ai-status");
 const aiOverview = document.getElementById("ai-overview");
 const Reload = document.getElementById("reload");
+const outputContainer = document.getElementById("output-container");
 
 function initScene() {
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x000000);
+    scene.background = new THREE.Color(0x050608);
 
     camera = new THREE.PerspectiveCamera(
         45,
@@ -62,6 +64,41 @@ function onWindowResize() {
     renderer.setSize(sceneContainer.clientWidth, sceneContainer.clientHeight);
 }
 
+// Downsample WebGL canvas to 512x512 JPEG to drastically reduce vision tokens
+function getOptimizedScreenshot() {
+    const tempCanvas = document.createElement('canvas');
+    const ctx = tempCanvas.getContext('2d');
+    
+    tempCanvas.width = 512;
+    tempCanvas.height = 512;
+    
+    ctx.drawImage(renderer.domElement, 0, 0, 512, 512);
+    
+    return tempCanvas.toDataURL('image/jpeg', 0.7);
+}
+
+// Typewriter Helper Function with Dynamic Glowing Border
+async function streamTextToElement(targetElement, containerElement, markdownText, speedMs = 12) {
+    targetElement.innerHTML = "";
+    if (containerElement) containerElement.classList.add("is-generating");
+
+    let currentText = "";
+    const chunkSize = 3; // Renders 3 characters per tick for a smooth, fast stream
+
+    for (let i = 0; i < markdownText.length; i += chunkSize) {
+        currentText += markdownText.slice(i, i + chunkSize);
+        targetElement.innerHTML = marked.parse(currentText);
+
+        if (containerElement) {
+            containerElement.scrollTop = containerElement.scrollHeight;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, speedMs));
+    }
+
+    if (containerElement) containerElement.classList.remove("is-generating");
+}
+
 // Reusable STL File Handler
 function handleFileSelect(e) {
     const file = e.target.files[0];
@@ -87,12 +124,12 @@ function handleFileSelect(e) {
         });
 
         currentMesh = new THREE.Mesh(geometry, material);
-        // fix to make models render in correctly, instead of upside down, sideways ect
+        // Fix to make models render in correctly (Z-up orientation)
         currentMesh.rotation.x = -Math.PI / 2;
 
         scene.add(currentMesh);
         document.getElementsByClassName("upload-box")[0].style.display = "none";
-        Reload.style.display = "flex";
+        if (Reload) Reload.style.display = "flex";
         
         // Calculate size metrics from raw geometry bounds
         const bbox = geometry.boundingBox;
@@ -114,34 +151,59 @@ function handleFileSelect(e) {
             vertices: geometry.attributes.position.count
         };
 
+        // Reset image cache and input UI on new model load
+        cachedScreenshot = null;
+        if (inputField) inputField.placeholder = "Tell me about your model...";
+
         enterButton.disabled = false;
         aiStatus.textContent = "Model loaded successfully. Ready to submit.";
         aiOverview.textContent = "";
     };
 }
 
-// Method 1: Attaching the shared handler to both inputs
 // Listen for file selections on the input
 fileInput.addEventListener("change", handleFileSelect);
 
 // Make the Reload button open the file selector when clicked
 if (Reload) {
     Reload.addEventListener("click", () => {
-        fileInput.value = ""; // Reset value so re-uploading the same file still fires the change event
+        fileInput.value = ""; // Reset value so re-uploading the same file fires change event
         fileInput.click();
     });
 }
 
-// Capture Canvas & Call Server API
+// Handle Enter key submission
+if (inputField) {
+    inputField.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            if (!enterButton.disabled) {
+                enterButton.click();
+            }
+        }
+    });
+}
+
+// Capture Canvas & Call Server API with Typewriter Streaming
 enterButton.addEventListener("click", async () => {
     if (!currentMesh || !modelInfo) return;
 
-    enterButton.disabled = true;
-    aiStatus.textContent = "Analyzing model visual geometry & properties...";
-    aiOverview.textContent = "";
+    // Check if an audit was already completed for this model instance
+    const isFollowUp = cachedScreenshot !== null;
 
-    renderer.render(scene, camera);
-    const screenshotDataUrl = renderer.domElement.toDataURL("image/png");
+    enterButton.disabled = true;
+    aiStatus.textContent = isFollowUp ? "Thinking..." : "Analyzing model geometry & prompt...";
+    
+    if (!isFollowUp) {
+        aiOverview.textContent = "";
+    }
+
+    // Generate downsampled screenshot only ONCE per loaded model
+    if (!cachedScreenshot) {
+        renderer.render(scene, camera);
+        cachedScreenshot = getOptimizedScreenshot();
+    }
+
     const userPromptText = inputField.value.trim();
 
     try {
@@ -151,9 +213,10 @@ enterButton.addEventListener("click", async () => {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                screenshot: screenshotDataUrl,
+                screenshot: cachedScreenshot,
                 modelInfo: modelInfo,
-                userPrompt: userPromptText
+                userPrompt: userPromptText,
+                isFollowUp: isFollowUp // Explicitly flag follow-up requests
             })
         });
 
@@ -164,10 +227,17 @@ enterButton.addEventListener("click", async () => {
         }
 
         aiStatus.textContent = "Analysis Complete:";
-        aiOverview.innerHTML = marked.parse(data.overview);
+        
+        // Trigger Typewriter Stream & Border Glow
+        await streamTextToElement(aiOverview, outputContainer, data.overview);
+        
+        // Clear input field and set placeholder for follow-up questions
+        inputField.value = "";
+        inputField.placeholder = "Ask a follow up...";
 
     } catch (err) {
         console.error(err);
+        if (outputContainer) outputContainer.classList.remove("is-generating");
         aiStatus.textContent = "Error during analysis:";
         aiOverview.textContent = err.message;
     } finally {

@@ -32,12 +32,27 @@ app.post("/api/model-overview", async (req, res) => {
     const heightInches = (height / 25.4).toFixed(2);
     const depthInches = (depth / 25.4).toFixed(2);
 
-    const systemPrompt = `You are a world-class additive manufacturing expert and mechanical design engineer conducting a visual CAD audit and printability check for a teammate.
+    const hasFollowUpQuestion = userPrompt && userPrompt.trim().length > 0;
+
+    let systemPrompt = "";
+
+    if (hasFollowUpQuestion) {
+      systemPrompt = `You are an expert mechanical design engineer and teammate chatting about this 3D model render.
+
+User Question: "${userPrompt}"
+
+CRITICAL INSTRUCTIONS:
+- Answer the user's specific question directly with technical depth, but speak naturally like a sharp, helpful colleague in the shop ("Yeah, for PETG you'll want...", "Looking closely at that wall...").
+- Keep it concise (1–2 brief paragraphs max).
+- DO NOT repeat full CAD printability sweeps, dimension breakdowns, or generic slicer parameter dumps unless explicitly requested.
+- DO NOT use stiff section headers or robotic intro boilerplate. Jump right into a conversational, accurate answer.`;
+    } else {
+      // Full initial CAD audit mode on first load
+      systemPrompt = `You are a world-class additive manufacturing expert and mechanical design engineer conducting a visual CAD audit and printability check for a teammate.
 
 Part Metrics:
 - Dimensions (X x Y x Z): ${width}mm x ${height}mm x ${depth}mm (${widthInches}" x ${heightInches}" x ${depthInches}")
 - Detail Level: ${modelInfo.triangles.toLocaleString()} triangles
-${userPrompt ? `- Teammate Note: "${userPrompt}"` : ""}
 
 Deliver a concise, expert review (250–300 words) written in a warm, direct, first-person voice ("Looking at this...", "I noticed..."). Speak like a knowledgeable colleague—no rigid, robotic section titles or generic boilerplate.
 
@@ -55,6 +70,7 @@ Perform a thorough visual & structural sweep covering:
    - Provide exact slicer parameters: Infill pattern (e.g., Gyroid) and percentage (e.g., 15-20%), wall loop count, and layer height recommendation.
 
 Wrap up with an encouraging, confident sign-off! Keep the formatting clean using natural paragraphs and simple bolding for key specs—no heavy bullet dumps or manual-style headers.`;
+    }
 
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",

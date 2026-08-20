@@ -11,7 +11,6 @@
             "imports": {
               "three": "/node_modules/three/build/three.module.js",
               "three/addons/": "/node_modules/three/examples/jsm/"
-            
             }
           }
         </script>
@@ -19,40 +18,67 @@
     </head>
 
     <body>
-        
-        <div id="scene-container"></div>
+        <header class="navbar">
+            <div class="brand">
+                <span class="brand-title">AI CAD Evaluator</span>
+                <span class="badge">v1.0</span>
+            </div>
+            <p class="tagline">Automated 3D Geometry Audit & Structural Inspection</p>
+        </header>
 
-        <button id="reload">New Model</button>
+        <main>
+            <!-- Left Panel: 3D Canvas & Upload Box -->
+            <div id="scene-container">
+                <button id="reload">New Model</button>
 
-        <center><h1 id="Droptext" style="color:rgb(255, 255, 255); font-family: monospace;">3D Viewer</h1></center>
-       
-        <label for="file-input" class="upload-box">
-          <svg class="dashed-border" viewBox="0 0 370 130" preserveAspectRatio="none">
-            <rect x="2" y="2" width="366" height="126" rx="20" fill="none" stroke="#2d3248" stroke-width="2" stroke-dasharray="8 8"/>
-          </svg>
-          
-          <!-- Upload Icon -->
-          <svg class="upload-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="17 8 12 3 7 8"/>
-            <line x1="12" y1="3" x2="12" y2="15"/>
-          </svg>
-        
-          <div class="upload-text">
-            <strong class="upload-title">Upload your <span class="highlight">.STL</span> file here</strong>
-            <span class="upload-subtitle">click to browse local files</span>
-          </div>
-        
-          <input id="file-input" type="file" accept=".stl, .3mf" hidden>
-        </label>
-        <input type="text" class="inputfield" placeholder="What should I look for?">
-        
-        <button id="enterbutton" style="color: white; font-family: monospace;" disabled>Submit</button>
+                <label for="file-input" class="upload-box">
+                  <svg class="dashed-border" viewBox="0 0 370 130" preserveAspectRatio="none">
+                    <rect x="2" y="2" width="366" height="126" rx="20" fill="none" stroke="#2d3248" stroke-width="2" stroke-dasharray="8 8"/>
+                  </svg>
+                  
+                  <svg class="upload-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                
+                  <div class="upload-text">
+                    <strong class="upload-title">Upload your <span class="highlight">.STL</span> file here</strong>
+                    <span class="upload-subtitle">click to browse local files</span>
+                  </div>
+                
+                  <input id="file-input" type="file" accept=".stl, .3mf" hidden>
+                </label>
+            </div>
 
-        <div id="output-container">
-            <p id="ai-status"></p>
-            <div id="ai-overview"></div>
-        </div>
+            <!-- Right Panel: AI Output & Interactive Input -->
+            <div class="sidebar-panel">
+                <div id="output-container">
+                    <p id="ai-status"></p>
+                    <div id="ai-overview">
+                        <!-- Default Empty State -->
+                        <div class="empty-state">
+                            <h3>AI Geometry Assistant</h3>
+                            <p>Upload a 3D model to inspect geometry, detect potential print issues, or evaluate design tolerances.</p>
+                            <div class="feature-pills">
+                                <span>⚡ Wall Thickness Analysis</span>
+                                <span>🛠️ Printability Audit</span>
+                                <span>📐 Bounding Box Specs</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-input-bar">
+                    <input type="text" class="inputfield" placeholder="Upload an STL file to get started" spellcheck="true" 
+                    autocorrect="on" 
+                    autocomplete="on" 
+                    capitalize="on">
+                    
+                    <button id="enterbutton" disabled>Submit</button>
+                </div>
+            </div>
+        </main>
 
         <script src="main.js" type="module" defer></script>
 </body>
