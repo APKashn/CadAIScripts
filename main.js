@@ -9,6 +9,7 @@ let cachedScreenshot = null; // Caches the initial screenshot to save API tokens
 const sceneContainer = document.getElementById("scene-container");
 const fileInput = document.getElementById("file-input");
 const enterButton = document.getElementById("enterbutton");
+const ovbutton = document.getElementById("overviewbutton");
 const inputField = document.querySelector(".inputfield");
 const aiStatus = document.getElementById("ai-status");
 const aiOverview = document.getElementById("ai-overview");
@@ -154,10 +155,11 @@ function handleFileSelect(e) {
         // Reset image cache and input UI on new model load
         cachedScreenshot = null;
         if (inputField) inputField.placeholder = "Tell me about your model...";
-
+        //ovbutton.style.display = "flex";
         enterButton.disabled = false;
         showToast("Model Loaded Successfully");
-        aiOverview.textContent = "";
+
+       // aiOverview.textContent = "";
     };
 }
 function showToast(message, isWarning = false) {
@@ -184,6 +186,7 @@ if (Reload) {
     });
 }
 
+
 // Handle Enter key submission
 if (inputField) {
     inputField.addEventListener("keydown", (e) => {
@@ -191,6 +194,7 @@ if (inputField) {
             e.preventDefault();
             if (!enterButton.disabled) {
                 enterButton.click();
+            } else {        showToast("Please upload a file", true);
             }
         }
     });

@@ -63,26 +63,31 @@ app.post("/api/model-overview", async (req, res) => {
 
     const hasFollowUpQuestion = userPrompt && userPrompt.trim().length > 0;
 
-    // Retained Exact Prompt Logic
+    // Shared metrics header prepended to ALL system prompts
+    const metricsHeader = `Part Metrics:
+- Dimensions (X x Y x Z): ${width}mm x ${height}mm x ${depth}mm (${widthInches}" x ${heightInches}" x ${depthInches}")
+- Detail Level: ${triangleCount} triangles`;
+
     let systemPrompt = "";
 
     if (hasFollowUpQuestion) {
       systemPrompt = `You are an expert mechanical design engineer and teammate chatting about this 3D model render.
+
+${metricsHeader}
 
 User Question: "${userPrompt}"
 
 CRITICAL INSTRUCTIONS:
 - Answer the user's specific question directly with technical depth, but speak naturally like a sharp, helpful colleague in the shop ("Yeah, for PETG you'll want...", "Looking closely at that wall...").
 - Keep it concise (1–2 brief paragraphs max).
--Always remember to give inches as a secondary unit after millimeters.
+- Use the Part Metrics above whenever answering questions about scale, wall thicknesses, or sizing.
+- Always remember to give inches as a secondary unit after millimeters.
 - DO NOT repeat full CAD printability sweeps, dimension breakdowns, or generic slicer parameter dumps unless explicitly requested.
 - DO NOT use stiff section headers or robotic intro boilerplate. Jump right into a conversational, accurate answer.`;
     } else {
       systemPrompt = `You are a world-class additive manufacturing expert and mechanical design engineer conducting a visual CAD audit and printability check for a teammate. Always remember to give inches as a secondary unit after millimeters.
 
-Part Metrics:
-- Dimensions (X x Y x Z): ${width}mm x ${height}mm x ${depth}mm (${widthInches}" x ${heightInches}" x ${depthInches}")
-- Detail Level: ${triangleCount} triangles
+${metricsHeader}
 
 Deliver a concise, expert review (250–300 words) written in a warm, direct, first-person voice ("Looking at this...", "I noticed..."). Speak like a knowledgeable colleague—no rigid, robotic section titles or generic boilerplate. Always remember to give inches as a secondary unit after millimeters.
 
@@ -105,29 +110,10 @@ Wrap up with an encouraging, confident sign-off! Keep the formatting clean using
     // Strategic Selection: Follow-up text queries bypass screenshot processing
     let selectedModel = (hasFollowUpQuestion && !screenshot) ? FALLBACK_MODEL : PRIMARY_MODEL;
 
-    try {
-      console.log(`[API] Dispatching request via ${selectedModel}...`);
-      const overview = await executeGroqCompletion(apiKey, selectedModel, systemPrompt, screenshot);
-      return res.json({ overview, modelUsed: selectedModel });
-
-    } catch (primaryError) {
-      console.warn(`[API] ${selectedModel} failed (${primaryError.message}). Executing fallback...`);
-
-      if (selectedModel !== FALLBACK_MODEL) {
-        try {
-          const fallbackOverview = await executeGroqCompletion(apiKey, FALLBACK_MODEL, systemPrompt, null);
-          return res.json({ 
-            overview: fallbackOverview + "", 
-            modelUsed: FALLBACK_MODEL 
-          });
-        } catch (fallbackError) {
-          console.error("[API] Both primary and fallback requests failed:", fallbackError);
-          return res.status(500).json({ error: `Primary Error: ${primaryError.message} | Fallback Error: ${fallbackError.message}` });
-        }
-      } else {
-        return res.status(500).json({ error: primaryError.message });
-      }
-    }
+    // Dispatch request...
+    console.log(`[API] Dispatching request via ${selectedModel}...`);
+    const overview = await executeGroqCompletion(apiKey, selectedModel, systemPrompt, screenshot);
+    return res.json({ overview, modelUsed: selectedModel });
 
   } catch (error) {
     console.error("Server Error:", error);
