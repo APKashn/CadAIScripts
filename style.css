@@ -7,7 +7,7 @@
 }
 
 body {
-  background-color: #0e1017; /* Brightened up overall background */
+  background-color: #0e1017;
   color: #f3f4f6;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   height: 100vh;
@@ -56,16 +56,17 @@ body {
 
 .tagline {
   font-size: 12.5px;
-  color: #94a3b8; /* Brighter secondary text */
+  color: #94a3b8;
 }
 
-/* Grid Layout Workspace - Expanded Right Panel Width */
+/* Grid Layout Workspace */
 main {
   display: grid;
-  grid-template-columns: 1fr 500px; /* Increased from 420px to give output box more room */
+  grid-template-columns: 1fr 500px;
   gap: 16px;
   height: calc(100vh - 52px);
   padding: 16px;
+  overflow: hidden;
 }
 
 /* 3D Scene Viewport */
@@ -85,7 +86,7 @@ main {
   height: 100%;
 }
 
-/* Original Upload Box Characteristics Restored */
+/* Upload Box Styling */
 .upload-box {
   position: absolute;
   top: 50%;
@@ -103,12 +104,10 @@ main {
   justify-content: center;
   gap: 8px;
 
-  background: #0d0e12; /* Restored original solid dark fill */
+  background: #0d0e12;
   border-radius: 20px;
   cursor: pointer;
   text-align: center;
-  
-  /* Smooth transitions */
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -149,10 +148,9 @@ main {
 .upload-subtitle {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 12px;
-  color: #a1a1aa; /* Lightened from dark gray */
+  color: #a1a1aa;
 }
 
-/* Original Hover State */
 .upload-box:hover {
   background: #12141c;
   transform: translate(-50%, -52%);
@@ -199,21 +197,26 @@ main {
   box-shadow: 0 4px 16px rgba(0, 112, 243, 0.3);
 }
 
-/* Sidebar & Expanded Output Panel */
+/* Sidebar & Output Panel (Flex Constraints Applied) */
 .sidebar-panel {
   display: flex;
   flex-direction: column;
   gap: 12px;
   height: 100%;
+  min-height: 0;
+  overflow: hidden;
 }
 
 #output-container {
   flex: 1;
+  min-height: 0; /* Prevents overflow from pushing chat bar down */
   padding: 20px;
-  background-color: #141721; /* Brightened container background */
+  background-color: #141721;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 16px;
-  overflow-y: auto;
+  overflow-y: auto; /* Enables vertical scrolling */
+  display: flex;
+  flex-direction: column;
 }
 
 #ai-status {
@@ -222,12 +225,14 @@ main {
   font-weight: bold;
   font-size: 13px;
   margin-bottom: 12px;
+  flex-shrink: 0;
 }
 
 #ai-overview {
-  color: #e2e8f0; /* Lightened text */
+  color: #e2e8f0;
   font-size: 14px;
   line-height: 1.65;
+  flex: 1;
 }
 
 /* Empty State Styling */
@@ -236,7 +241,7 @@ main {
   flex-direction: column;
   align-items: flex-start;
   gap: 12px;
-  padding-top: 24px;
+  padding-top: 12px;
 }
 
 .empty-state h3 {
@@ -259,16 +264,49 @@ main {
   width: 100%;
 }
 
+/* Base Feature Pill Styling & Transitions */
 .feature-pills span {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 10px 14px;
   border-radius: 10px;
   font-size: 12.5px;
   color: #cbd5e1;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Chat Input Bar */
+.feature-pills span:hover {
+  transform: translateY(-2px);
+  color: #ffffff;
+}
+
+/* 1. Wall Thickness Analysis (Electric Yellow / Amber Glow) */
+.feature-pills span:nth-child(1):hover {
+  background: rgba(255, 191, 0, 0.08);
+  border-color: rgba(255, 191, 0, 0.5);
+  box-shadow: 0 4px 20px rgba(255, 191, 0, 0.25), 
+              0 0 10px rgba(255, 191, 0, 0.15);
+}
+
+/* 2. Printability Audit (Neon Teal / Cyan Glow) */
+.feature-pills span:nth-child(2):hover {
+  background: rgba(0, 212, 255, 0.08);
+  border-color: rgba(0, 212, 255, 0.5);
+  box-shadow: 0 4px 20px rgba(0, 212, 255, 0.25), 
+              0 0 10px rgba(0, 212, 255, 0.15);
+}
+
+/* 3. Bounding Box Specs (Vibrant Purple / Indigo Glow) */
+.feature-pills span:nth-child(3):hover {
+  background: rgba(168, 85, 247, 0.08);
+  border-color: rgba(168, 85, 247, 0.5);
+  box-shadow: 0 4px 20px rgba(168, 85, 247, 0.25), 
+              0 0 10px rgba(168, 85, 247, 0.15);
+}
+
+/* Chat Input Bar (Pinned Bottom) */
 .chat-input-bar {
   display: flex;
   align-items: center;
@@ -277,6 +315,7 @@ main {
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 14px;
   padding: 6px 8px 6px 16px;
+  flex-shrink: 0; /* Prevents input bar from disappearing */
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -297,7 +336,7 @@ main {
 }
 
 .inputfield::placeholder {
-  color: #818cf8; /* Brightened placeholder tone */
+  color: #818cf8;
   opacity: 0.7;
 }
 
@@ -359,49 +398,4 @@ main {
     box-shadow: 0 0 24px rgba(0, 212, 255, 0.45);
     border-color: #00d4ff;
   }
-}
-
-/* Base Feature Pill Styling & Transitions */
-.feature-pills span {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 10px 14px;
-  border-radius: 10px;
-  font-size: 12.5px;
-  color: #cbd5e1;
-  cursor: pointer;
-  user-select: none;
-  
-  /* Smooth transform & glow transition */
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Hover base lift */
-.feature-pills span:hover {
-  transform: translateY(-2px);
-  color: #ffffff;
-}
-
-/* 1. Wall Thickness Analysis (Electric Yellow / Amber Glow) */
-.feature-pills span:nth-child(1):hover {
-  background: rgba(255, 191, 0, 0.08);
-  border-color: rgba(255, 191, 0, 0.5);
-  box-shadow: 0 4px 20px rgba(255, 191, 0, 0.25), 
-              0 0 10px rgba(255, 191, 0, 0.15);
-}
-
-/* 2. Printability Audit (Neon Teal / Cyan Glow) */
-.feature-pills span:nth-child(2):hover {
-  background: rgba(0, 212, 255, 0.08);
-  border-color: rgba(0, 212, 255, 0.5);
-  box-shadow: 0 4px 20px rgba(0, 212, 255, 0.25), 
-              0 0 10px rgba(0, 212, 255, 0.15);
-}
-
-/* 3. Bounding Box Specs (Vibrant Purple / Indigo Glow) */
-.feature-pills span:nth-child(3):hover {
-  background: rgba(168, 85, 247, 0.08);
-  border-color: rgba(168, 85, 247, 0.5);
-  box-shadow: 0 4px 20px rgba(168, 85, 247, 0.25), 
-              0 0 10px rgba(168, 85, 247, 0.15);
 }

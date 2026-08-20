@@ -10,30 +10,60 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Increase payload limit to handle base64 image streams
+// Set models
+const PRIMARY_MODEL = "qwen/qwen3.6-27b";             // Primary vision model
+//const FALLBACK_MODEL = "llama3-70b-8192";  // Highly reliable 70B text model
+// OR
+// const FALLBACK_MODEL = "llama3-8b-8192";   // Ultra-fast 8B fallback
+// OR
+ const FALLBACK_MODEL = "openai/gpt-oss-120b";  // Fast, reliable Groq fallback
+
+// Payload limit retained to handle high-res base64 image streams
 app.use(express.json({ limit: "50mb" }));
+
+// CSP and Static File Middleware
+app.use((req, res, next) => {
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self'; " +
+    "connect-src 'self' http://localhost:3000 https://api.groq.com; " +
+    "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+    "font-src 'self' https://fonts.gstatic.com; " +
+    "img-src 'self' data: blob:;"
+  );
+  next();
+});
+
 app.use(express.static(__dirname));
+app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
+
+app.get('/favicon.png', (req, res) => res.status(204).end());
+app.get('/favicon.ico', (req, res) => res.status(204).end());
 
 app.post("/api/model-overview", async (req, res) => {
   try {
     const { screenshot, modelInfo, userPrompt } = req.body;
-    const apiKey = process.env.GROQ_API_KEY;
+    const apiKey = process.env.GROQ_API_KEY || process.env.OPENROUTER_API_KEY;
 
     if (!apiKey) {
       return res.status(500).json({ error: "GROQ_API_KEY is missing on the server environment." });
     }
 
-    if (!screenshot) {
-      return res.status(400).json({ error: "No screenshot data provided." });
+    if (!modelInfo || !modelInfo.dimensions) {
+      return res.status(400).json({ error: "Missing model geometry metadata." });
     }
 
+    // Dimension Calculations
     const { width, height, depth } = modelInfo.dimensions;
     const widthInches = (width / 25.4).toFixed(2);
     const heightInches = (height / 25.4).toFixed(2);
     const depthInches = (depth / 25.4).toFixed(2);
+    const triangleCount = modelInfo.triangles ? modelInfo.triangles.toLocaleString() : "N/A";
 
     const hasFollowUpQuestion = userPrompt && userPrompt.trim().length > 0;
 
+    // Retained Exact Prompt Logic
     let systemPrompt = "";
 
     if (hasFollowUpQuestion) {
@@ -47,12 +77,11 @@ CRITICAL INSTRUCTIONS:
 - DO NOT repeat full CAD printability sweeps, dimension breakdowns, or generic slicer parameter dumps unless explicitly requested.
 - DO NOT use stiff section headers or robotic intro boilerplate. Jump right into a conversational, accurate answer.`;
     } else {
-      // Full initial CAD audit mode on first load
       systemPrompt = `You are a world-class additive manufacturing expert and mechanical design engineer conducting a visual CAD audit and printability check for a teammate.
 
 Part Metrics:
 - Dimensions (X x Y x Z): ${width}mm x ${height}mm x ${depth}mm (${widthInches}" x ${heightInches}" x ${depthInches}")
-- Detail Level: ${modelInfo.triangles.toLocaleString()} triangles
+- Detail Level: ${triangleCount} triangles
 
 Deliver a concise, expert review (250–300 words) written in a warm, direct, first-person voice ("Looking at this...", "I noticed..."). Speak like a knowledgeable colleague—no rigid, robotic section titles or generic boilerplate.
 
@@ -72,43 +101,32 @@ Perform a thorough visual & structural sweep covering:
 Wrap up with an encouraging, confident sign-off! Keep the formatting clean using natural paragraphs and simple bolding for key specs—no heavy bullet dumps or manual-style headers.`;
     }
 
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "qwen/qwen3.6-27b",
-        reasoning_effort: "none",
-        messages: [
-          {
-            role: "user",
-            content: [
-              { type: "text", text: systemPrompt },
-              {
-                type: "image_url",
-                image_url: { url: screenshot }
-              }
-            ]
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 1200
-      })
-    });
+    // Strategic Selection: Follow-up text queries bypass screenshot processing
+    let selectedModel = (hasFollowUpQuestion && !screenshot) ? FALLBACK_MODEL : PRIMARY_MODEL;
 
-    const data = await response.json();
+    try {
+      console.log(`[API] Dispatching request via ${selectedModel}...`);
+      const overview = await executeGroqCompletion(apiKey, selectedModel, systemPrompt, screenshot);
+      return res.json({ overview, modelUsed: selectedModel });
 
-    if (!response.ok) {
-      console.error("Groq Vision API Error:", data);
-      return res.status(response.status).json({
-        error: data.error?.message || "Groq API request failed."
-      });
+    } catch (primaryError) {
+      console.warn(`[API] ${selectedModel} failed (${primaryError.message}). Executing fallback...`);
+
+      if (selectedModel !== FALLBACK_MODEL) {
+        try {
+          const fallbackOverview = await executeGroqCompletion(apiKey, FALLBACK_MODEL, systemPrompt, null);
+          return res.json({ 
+            overview: fallbackOverview + "", 
+            modelUsed: FALLBACK_MODEL 
+          });
+        } catch (fallbackError) {
+          console.error("[API] Both primary and fallback requests failed:", fallbackError);
+          return res.status(500).json({ error: `Primary Error: ${primaryError.message} | Fallback Error: ${fallbackError.message}` });
+        }
+      } else {
+        return res.status(500).json({ error: primaryError.message });
+      }
     }
-
-    const overview = data.choices?.[0]?.message?.content || "No review output generated.";
-    res.json({ overview });
 
   } catch (error) {
     console.error("Server Error:", error);
@@ -116,6 +134,55 @@ Wrap up with an encouraging, confident sign-off! Keep the formatting clean using
   }
 });
 
+// Helper Function Retaining Exact Model API Call Settings
+async function executeGroqCompletion(apiKey, modelName, promptText, imageBase64) {
+  let contentPayload = [];
+
+  if (imageBase64 && modelName === PRIMARY_MODEL) {
+    contentPayload = [
+      { type: "text", text: promptText },
+      { type: "image_url", image_url: { url: imageBase64 } }
+    ];
+  } else {
+    contentPayload = promptText;
+  }
+
+  const requestBody = {
+    model: modelName,
+    messages: [
+      {
+        role: "user",
+        content: contentPayload
+      }
+    ],
+    temperature: 0.7,
+    max_tokens: 1200
+  };
+
+  // Attach reasoning_effort only when supported by the model
+  if (modelName === PRIMARY_MODEL) {
+    requestBody.reasoning_effort = "none";
+  }
+
+  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(requestBody)
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error?.message || `Groq API call returned HTTP ${response.status}`);
+  }
+
+  return data.choices?.[0]?.message?.content || "No review output generated.";
+}
+
+// Catch-all route to serve SPA
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
