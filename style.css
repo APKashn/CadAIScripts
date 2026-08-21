@@ -308,6 +308,13 @@ main {
               0 0 10px rgba(168, 85, 247, 0.15);
 }
 
+.feature-pills span:nth-child(6):hover {
+  background: rgba(250, 2, 2, 0.08);
+  border-color: rgba(255, 65, 13, 0.5);
+  box-shadow: 0 4px 20px rgba(217, 88, 2, 0.25), 
+              0 0 10px rgba(219, 130, 6, 0.15);
+}
+
 /* Chat Input Bar (Pinned Bottom) */
 .chat-input-bar {
   display: flex;
@@ -460,11 +467,12 @@ main {
   color: #ef4444;
 }
 
-.overview-btn {
-  display: none; /* Initially hidden until STL loads */
+.ready {
+  display: flex; /* Initially hidden until STL loads */
   align-items: center;
   gap: 8px;
-  width: 400px;
+  width: 166px;
+  transform: translateY(30px);
   padding: 8px 18px;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: #ffffff;
@@ -478,14 +486,14 @@ main {
   transition: all 0.2s ease-in-out;
 }
 
-.overview-btn:hover {
+.ready:hover {
   background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
   box-shadow: 0 0 20px rgba(52, 211, 153, 0.55);
-  transform: translateY(-2px) scale(1.02);
+  transform: translateY(28px) scale(1.02);
 }
 
-.overview-btn:active {
-  transform: translateY(5px) scale(0.98);
+.ready:active {
+  transform: translateY(35px) scale(0.98);
   box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
 }
 

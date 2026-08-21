@@ -4,21 +4,22 @@ import { STLLoader } from 'three/addons/loaders/STLLoader.js';
 
 let scene, camera, renderer, controls, currentMesh;
 let modelInfo = null;
-let cachedScreenshot = null; // Caches the initial screenshot to save API tokens
+let cachedScreenshot = null; 
 
 const sceneContainer = document.getElementById("scene-container");
 const fileInput = document.getElementById("file-input");
 const enterButton = document.getElementById("enterbutton");
-const ovbutton = document.getElementById("overviewbutton");
 const inputField = document.querySelector(".inputfield");
 const aiStatus = document.getElementById("ai-status");
 const aiOverview = document.getElementById("ai-overview");
 const Reload = document.getElementById("reload");
 const outputContainer = document.getElementById("output-container");
-
+const Scroll = document.getElementById("inst"); 
+const Ready = document.getElementById("Ready");
+const Helpdiv = document.querySelector(".how-it-works-container")
 function initScene() {
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x000012);
+    scene.background = new THREE.Color(0x000023);
 
     camera = new THREE.PerspectiveCamera(
         45,
@@ -162,6 +163,23 @@ function handleFileSelect(e) {
        // aiOverview.textContent = "";
     };
 }
+if (Scroll && Helpdiv) {
+    Scroll.addEventListener("click", () => {
+      Helpdiv.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    });
+  }
+
+  if (Ready) {
+    Ready.addEventListener("click", () => {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    });
+  }
 function showToast(message, isWarning = false) {
     const toast = document.getElementById('toast-notification');
     if (!toast) return;
