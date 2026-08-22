@@ -155,7 +155,7 @@ function handleFileSelect(e) {
 
         // Reset image cache and input UI on new model load
         cachedScreenshot = null;
-        if (inputField) inputField.placeholder = "Tell me about your model...";
+        if (inputField) inputField.placeholder = "Ask something...";
         //ovbutton.style.display = "flex";
         enterButton.disabled = false;
         showToast("Model Loaded Successfully");

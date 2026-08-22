@@ -341,7 +341,10 @@ main {
   outline: none;
   color: #ffffff;
   font-family: 'Inter', sans-serif;
-  font-size: 14px;
+  font-size: 15px;
+  overflow-y: auto;
+  resize: none;
+  padding-top: 10px;
 }
 
 .inputfield::placeholder {
