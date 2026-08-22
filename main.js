@@ -181,14 +181,14 @@ if (Scroll && Helpdiv) {
   if (Wall) {
     Wall.addEventListener("click", () => {
         if(!enterButton.disabled) {
-            inputField.value = "Tell me what's a good wall thickness for this model.";
+            inputField.value = "Analyze this model and recommend an appropriate wall thickness for 3D printing.";
         } else {showToast("Please upload a file", true);}
     });
   }
   if (Audit) {
     Audit.addEventListener("click", () => {
         if(!enterButton.disabled) {
-            inputField.value = "How will this model print with standard FDM?";
+            inputField.value = "Perform a printability audit of this model for standard FDM 3D printing. Identify potential issues and suggest improvements.";
         } else {showToast("Please upload a file", true);}
     });
   }
@@ -196,7 +196,7 @@ if (Scroll && Helpdiv) {
   if (Specs) {
     Specs.addEventListener("click", () => {
         if(!enterButton.disabled) {
-            inputField.value = "Give me information about the dimensions of this model, and how it relates to the average print bed.";
+            inputField.value = "Analyze the dimensions of this model and compare its bounding box to a standard FDM print bed. Include its overall size, required print area, and whether it will fit.";
         } else {showToast("Please upload a file", true);}
     });
   }
@@ -253,6 +253,7 @@ if (inputField) {
             e.preventDefault();
             if (!enterButton.disabled) {
                 enterButton.click();
+                inputField.value="";
             } else {        showToast("Please upload a file", true);
             }
         }
@@ -262,6 +263,8 @@ if (inputField) {
 // Capture Canvas & Call Server API with Typewriter Streaming
 enterButton.addEventListener("click", async () => {
     if (!currentMesh || !modelInfo) return;
+    inputField.value = "";
+
 
     // Check if an audit was already completed for this model instance
     const isFollowUp = cachedScreenshot !== null;
@@ -307,7 +310,6 @@ enterButton.addEventListener("click", async () => {
         await streamTextToElement(aiOverview, outputContainer, data.overview);
         
         // Clear input field and set placeholder for follow-up questions
-        inputField.value = "";
         inputField.placeholder = "Ask a follow up...";
 
     } catch (err) {

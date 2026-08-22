@@ -10,18 +10,12 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Set models
 const PRIMARY_MODEL = "qwen/qwen3.6-27b";             // Primary vision model
-//const FALLBACK_MODEL = "llama3-70b-8192";  // Highly reliable 70B text model
-// OR
-// const FALLBACK_MODEL = "llama3-8b-8192";   // Ultra-fast 8B fallback
-// OR
+
  const FALLBACK_MODEL = "openai/gpt-oss-120b";  // Fast, reliable Groq fallback
 
-// Payload limit retained to handle high-res base64 image streams
 app.use(express.json({ limit: "50mb" }));
 
-// CSP and Static File Middleware
 app.use((req, res, next) => {
   res.setHeader(
     "Content-Security-Policy",
@@ -63,7 +57,7 @@ app.post("/api/model-overview", async (req, res) => {
 
     const hasFollowUpQuestion = userPrompt && userPrompt.trim().length > 0;
 
-    // Shared metrics header prepended to ALL system prompts
+    // Shared metrics header given to ALL system prompts
     const metricsHeader = `Part Metrics:
 - Dimensions (X x Y x Z): ${width}mm x ${height}mm x ${depth}mm (${widthInches}" x ${heightInches}" x ${depthInches}")
 - Detail Level: ${triangleCount} triangles`;
@@ -83,7 +77,7 @@ CRITICAL INSTRUCTIONS:
 - Use the Part Metrics above whenever answering questions about scale, wall thicknesses, or sizing.
 - Always remember to give inches as a secondary unit after millimeters.
 - DO NOT repeat full CAD printability sweeps, dimension breakdowns, or generic slicer parameter dumps unless explicitly requested.
-- DO NOT use stiff section headers or robotic intro boilerplate. Jump right into a conversational, accurate answer.`;
+- DO NOT use stiff section headers or robotic intro boilerplate. Jump right into a conversational, accurate answer. At the end, ask a follow up based on what the users prompt was, or something that would help you get more information. Tell the user what would help give you more information on how to audit the part.`;
     } else {
       systemPrompt = `You are a world-class additive manufacturing expert and mechanical design engineer conducting a visual CAD audit and printability check for a teammate. Always remember to give inches as a secondary unit after millimeters.
 
@@ -104,7 +98,7 @@ Perform a thorough visual & structural sweep covering:
 3. Slicer Settings:
    - Provide exact slicer parameters: Infill pattern (e.g., Gyroid) and percentage (e.g., 15-20%), wall loop count, and layer height recommendation.
 
-Wrap up with an encouraging, confident sign-off! Keep the formatting clean using natural paragraphs and simple bolding for key specs—no heavy bullet dumps or manual-style headers.`;
+Wrap up with an encouraging, confident sign-off! Keep the formatting clean using natural paragraphs and simple bolding for key specs—no heavy bullet dumps or manual-style headers. Ask a follow up question of what the part might be used for, or what the user is thinking.`;
     }
 
     // Strategic Selection: Follow-up text queries bypass screenshot processing
