@@ -263,7 +263,6 @@ if (inputField) {
 // Capture Canvas & Call Server API with Typewriter Streaming
 enterButton.addEventListener("click", async () => {
     if (!currentMesh || !modelInfo) return;
-    inputField.value = "";
 
 
     // Check if an audit was already completed for this model instance
@@ -307,6 +306,8 @@ enterButton.addEventListener("click", async () => {
         aiStatus.textContent = "Analysis Complete:";
         
         // Trigger Typewriter Stream & Border Glow
+        inputField.value = "";
+
         await streamTextToElement(aiOverview, outputContainer, data.overview);
         
         // Clear input field and set placeholder for follow-up questions
