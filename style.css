@@ -284,23 +284,30 @@ main {
   color: #ffffff;
 }
 
-/* 1. Wall Thickness Analysis (Electric Yellow / Amber Glow) */
+.feature-pills span:nth-child(1) {
+  background: linear-gradient(90deg, rgba(168, 85, 247, 0.08) 0%, rgba(255, 191, 0,0.141) 100%);
+ 
+}
 .feature-pills span:nth-child(1):hover {
   background: rgba(255, 191, 0, 0.08);
   border-color: rgba(255, 191, 0, 0.5);
   box-shadow: 0 4px 20px rgba(255, 191, 0, 0.25), 
               0 0 10px rgba(255, 191, 0, 0.15);
 }
-
-/* 2. Printability Audit (Neon Teal / Cyan Glow) */
+.feature-pills span:nth-child(2) {
+  background: linear-gradient(90deg, rgba(168, 85, 247, 0.08) 0%, rgba(0, 212, 255,0.141) 100%);
+ 
+}
 .feature-pills span:nth-child(2):hover {
   background: rgba(0, 212, 255, 0.08);
   border-color: rgba(0, 212, 255, 0.5);
   box-shadow: 0 4px 20px rgba(0, 212, 255, 0.25), 
               0 0 10px rgba(0, 212, 255, 0.15);
 }
-
-/* 3. Bounding Box Specs (Vibrant Purple / Indigo Glow) */
+.feature-pills span:nth-child(3) {
+  background: linear-gradient(90deg, rgba(168, 85, 247, 0.08) 0%, rgba(169, 85, 247, 0.141) 100%);
+ 
+}
 .feature-pills span:nth-child(3):hover {
   background: rgba(168, 85, 247, 0.08);
   border-color: rgba(168, 85, 247, 0.5);
@@ -308,9 +315,24 @@ main {
               0 0 10px rgba(168, 85, 247, 0.15);
 }
 
-.feature-pills span:nth-child(6):hover {
+.feature-pills span:nth-child(4) {
+  background: linear-gradient(90deg, rgba(168, 85, 247, 0.08) 0%, rgba(44, 255, 11, 0.141) 100%);
+ 
+}
+
+.feature-pills span:nth-child(4):hover {
+  background: rgba(1, 183, 1, 0.183);
+  border-color: rgba(3, 255, 40, 0.5);
+  box-shadow: 0 4px 20px rgba(85, 247, 99, 0.25), 
+              0 0 10px rgba(193, 255, 21, 0.15);
+}
+.feature-pills span:nth-child(7) {
+  border-color: rgb(255, 65, 13);
+
+}
+.feature-pills span:nth-child(7):hover {
   background: rgba(250, 2, 2, 0.08);
-  border-color: rgba(255, 65, 13, 0.5);
+  border-color: rgba(255, 65, 13, 1);
   box-shadow: 0 4px 20px rgba(217, 88, 2, 0.25), 
               0 0 10px rgba(219, 130, 6, 0.15);
 }

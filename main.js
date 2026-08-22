@@ -14,7 +14,13 @@ const aiStatus = document.getElementById("ai-status");
 const aiOverview = document.getElementById("ai-overview");
 const Reload = document.getElementById("reload");
 const outputContainer = document.getElementById("output-container");
+
 const Scroll = document.getElementById("inst"); 
+const Wall = document.getElementById("wall"); 
+const Audit = document.getElementById("audit"); 
+const Specs = document.getElementById("boxspecs"); 
+const Fulleval = document.getElementById("fulleval"); 
+
 const Ready = document.getElementById("Ready");
 const Helpdiv = document.querySelector(".how-it-works-container")
 function initScene() {
@@ -133,7 +139,7 @@ function handleFileSelect(e) {
         document.getElementsByClassName("upload-box")[0].style.display = "none";
         if (Reload) Reload.style.display = "flex";
         
-        // Calculate size metrics from raw geometry bounds
+        // Calculate size metrics
         const bbox = geometry.boundingBox;
         const size = new THREE.Vector3();
         bbox.getSize(size);
@@ -171,6 +177,41 @@ if (Scroll && Helpdiv) {
       });
     });
   }
+
+  if (Wall) {
+    Wall.addEventListener("click", () => {
+        if(!enterButton.disabled) {
+            inputField.value = "Tell me what's a good wall thickness for this model.";
+        } else {showToast("Please upload a file", true);}
+    });
+  }
+  if (Audit) {
+    Audit.addEventListener("click", () => {
+        if(!enterButton.disabled) {
+            inputField.value = "How will this model print with standard FDM?";
+        } else {showToast("Please upload a file", true);}
+    });
+  }
+  
+  if (Specs) {
+    Specs.addEventListener("click", () => {
+        if(!enterButton.disabled) {
+            inputField.value = "Give me information about the dimensions of this model, and how it relates to the average print bed.";
+        } else {showToast("Please upload a file", true);}
+    });
+  }
+
+
+  if (Fulleval) {
+    Fulleval.addEventListener("click", () => {
+        if(!enterButton.disabled) {
+            inputField.value="";
+            enterButton.click();
+        } else {showToast("Please upload a file", true);}
+    });
+  }
+  
+
 
   if (Ready) {
     Ready.addEventListener("click", () => {
